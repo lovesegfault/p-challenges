@@ -1,8 +1,8 @@
-//
-// Created by bemeurer on 12/30/17.
-//
-
 #include "name-generator.h"
+
+#define STREET_LIST  "lists/street_names.txt"
+#define FIRST_NAME_LIST  "lists/first_names.txt"
+#define LAST_NAME_LIST  "lists/last_names.txt"
 
 unsigned int random_uint() {
     unsigned int r_uint;
@@ -40,9 +40,9 @@ unsigned int generate_int(unsigned int lower, unsigned int upper) {
 
 char *generate_SSN() {
     char *SSN = calloc(10, sizeof(char)); // 9 SSN digits + \0
-    unsigned int group_number;
-    unsigned int serial_number;
-    unsigned int lead_number;
+    size_t group_number;
+    size_t serial_number;
+    size_t lead_number;
 
     do {
         group_number = generate_int(1, 99);
@@ -56,7 +56,8 @@ char *generate_SSN() {
         lead_number = generate_int(1, 999);
     } while ((lead_number == 666) || (lead_number > 900));
 
-    snprintf(SSN, 10, "%03d%02d%04d", lead_number, group_number, serial_number);
+    snprintf(SSN, 10, "%03zu%02zu%04zu",
+            lead_number, group_number, serial_number);
 
     static const char *know_ad = "219099999";
     static const char *woolworth = "219099999";
@@ -142,7 +143,7 @@ char *get_line(FILE *file, unsigned int line_number) {
             fseek(file, track_pos, SEEK_SET);
 
             for (size_t i = 0; i < char_count; ++i) {
-                line[i] = getc(file);
+                line[i] = (char) getc(file);
             }
             line[char_count] = '\0';
 
@@ -157,7 +158,7 @@ char *get_line(FILE *file, unsigned int line_number) {
 char *generate_address() {
     static const char *suffixes[8] = {"Street", "Lane", "Avenue", "Row", "Route", "Passage", "Boulevard", "Way"};
 
-    FILE *name_list = fopen("street_names.txt", "r");
+    FILE *name_list = fopen(STREET_LIST, "r");
 
     unsigned int pick = generate_int(1, count_lines(name_list));
     char *name = get_line(name_list, pick);
@@ -167,11 +168,57 @@ char *generate_address() {
     char *street = calloc(sz, sizeof(char));
     strncpy(street, suf, sz * sizeof(char));
 
-    street[strlen(suf)] = ' ';
-
+    strcat(street, " ");
     strcat(street, name);
 
     free(name);
     fclose(name_list);
     return street;
+}
+
+char *generate_name() {
+    FILE *first_names = fopen(FIRST_NAME_LIST, "r");
+    FILE *last_names = fopen(LAST_NAME_LIST, "r");
+
+    char* first = get_line(first_names, generate_int(1, count_lines(first_names)));
+    char* last = get_line(last_names, generate_int(1, count_lines(last_names)));
+
+    size_t sz = strlen(first) + strlen(last) + 2;
+
+    char *name = (char*)calloc(sz, sizeof(char));
+    strncpy(name, first, sz * sizeof(char));
+
+    strcat(name, " ");
+    strcat(name, last);
+
+    free(first);
+    free(last);
+    fclose(first_names);
+    fclose(last_names);
+    return name;
+}
+
+char *minimize_str(char *str) {
+    char *out = (char*) calloc(strlen(str), sizeof(char));
+    for(int i = 0; i < strlen(str); ++i){
+        out[i] = (char) tolower(str[i]);
+    }
+    return out;
+}
+
+char* generate_email(char* name) {
+    char *track;
+   // char *names[];
+    track = strtok(name, " ");
+}
+
+person generate_person() {
+    person p = {};
+    p.address = generate_address();
+    p.DOB = generate_DOB();
+    //p.email
+    p.name = generate_name();
+    p.SSN = generate_SSN();
+
+    return p;
 }
