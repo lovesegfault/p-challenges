@@ -1,0 +1,58 @@
+{
+  "variant": {
+    "label": "Release",
+    "keywordSettings": {
+      "buildType": "release"
+    },
+    "description": "Enable optimizations, omit debug info"
+  },
+  "activeEnvironments": [],
+  "codeModel": {
+    "configurations": [
+      {
+        "name": "Release",
+        "projects": [
+          {
+            "buildDirectory": "/home/bemeurer/src/c-challenges/00-name-generator/build",
+            "name": "00_name_generator",
+            "sourceDirectory": "/home/bemeurer/src/c-challenges/00-name-generator",
+            "targets": [
+              {
+                "artifacts": [
+                  "/home/bemeurer/src/c-challenges/00-name-generator/build/00-name-generator"
+                ],
+                "buildDirectory": "/home/bemeurer/src/c-challenges/00-name-generator/build",
+                "fileGroups": [
+                  {
+                    "isGenerated": false,
+                    "sources": [
+                      "name-generator.h"
+                    ]
+                  },
+                  {
+                    "compileFlags": "-O3 -DNDEBUG   -std=gnu99",
+                    "isGenerated": false,
+                    "language": "C",
+                    "sources": [
+                      "main.c",
+                      "name-generator.c"
+                    ]
+                  }
+                ],
+                "fullName": "00-name-generator",
+                "linkLanguageFlags": "-O3 -DNDEBUG",
+                "linkerLanguage": "C",
+                "name": "00-name-generator",
+                "sourceDirectory": "/home/bemeurer/src/c-challenges/00-name-generator",
+                "type": "EXECUTABLE"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "cookie": "0.6253861247088259",
+    "inReplyTo": "codemodel",
+    "type": "reply"
+  }
+}
