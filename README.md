@@ -98,7 +98,7 @@ See also: [HackerRank](https://www.hackerrank.com/), [CodeChef](https://www.code
 1. IMP interpreter
 1. Tetris
 1. Conway's Game of Life (other cellular automata)
-1. Web crawler 
+1. Web crawler
 1. Text Editor
 1. RSS feed reader
 1. RPN calculator
