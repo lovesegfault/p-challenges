@@ -8,9 +8,8 @@ static bool HAS_URANDOM = true; // Global
 
 unsigned int random_uint() {
     unsigned int r_uint;
-    FILE *f;
 
-    f = fopen("/dev/urandom", "r");
+    FILE *f = fopen("/dev/urandom", "r");
     if (f == NULL) {
         if (HAS_URANDOM) {
             printf("---- Failed loading random generator device /dev/urandom. Defaulting to rand().\n");
@@ -51,6 +50,10 @@ unsigned int generate_int(unsigned int lower, unsigned int upper) {
 
 char *generate_SSN() {
     char *SSN = calloc(10, sizeof(char)); // 9 SSN digits + \0
+    if (SSN == NULL) {
+        printf("---- Failed allocating SSN buffer.\n");
+        exit(EXIT_FAILURE);
+    }
     size_t group_number;
     size_t serial_number;
     size_t lead_number;
@@ -190,7 +193,7 @@ char *generate_address() {
 
     free(name);
 
-    char *number = calloc(4, sizeof(char));
+    char *number = calloc(5, sizeof(char));
     sprintf(number, "%d", generate_int(1, 9999));
 
     strcat(street, " ");
@@ -230,12 +233,10 @@ char *generate_name() {
     return name;
 }
 
-char *minimize_str(char *str) {
-    char *out = (char *) calloc(strlen(str), sizeof(char));
+void lower_str(char *str) {
     for (size_t i = 0; i < strlen(str); ++i) {
-        out[i] = (char) tolower(str[i]);
+        str[i] = (char) tolower(str[i]);
     }
-    return out;
 }
 
 
@@ -261,7 +262,7 @@ size_t split_str(char *str, const char delim, char ***dest) {
     char *dup = strdup(str);
     if (dup == NULL) return 0;
 
-    char *found;
+    char *found = NULL;
     delim_count = 0;
     while ((found = strsep(&dup, &delim)) != NULL) {
         tokens[delim_count] = calloc(strlen(found) + 1, sizeof(char));
@@ -297,7 +298,7 @@ char *generate_email(char *name, struct tm *DOB) {
     char **tokens;
     size_t name_count = split_str(name, ' ', &tokens);
 
-    size_t email_size = 0;
+    size_t email_size = 1;
     for (size_t i = 0; i < name_count; ++i) {
         email_size += strlen(tokens[i]);
     }
@@ -318,13 +319,17 @@ char *generate_email(char *name, struct tm *DOB) {
     shuffle(tokens, name_count);
 
     for (size_t i = 0; i < name_count; ++i) {
-        strcat(email, minimize_str(tokens[i]));
+        lower_str(tokens[i]);
+        strcat(email, tokens[i]);
+        free(tokens[i]);
         if ((use_dash && i < name_count - 1) || (use_dash && use_dob)) {
             strcat(email, "-");
         }
     }
+    free(tokens);
     if (use_dob) {
         strcat(email, year);
+        free(year);
     }
     strcat(email, provider);
 

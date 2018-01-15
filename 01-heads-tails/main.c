@@ -1,6 +1,7 @@
 #include <stdio.h>
+#include "heads-tails.h"
 
 int main() {
-    printf("Hello, World!\n");
+    game();
     return 0;
 }
