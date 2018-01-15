@@ -9,6 +9,10 @@ unsigned int random_uint() {
     FILE *f;
 
     f = fopen("/dev/urandom", "r");
+    if(f == NULL) {
+        printf("Failed loading random generator device /dev/urandom.");
+        exit(EXIT_FAILURE);
+    }
     fread(&r_uint, sizeof(r_uint), 1, f);
     fclose(f);
 
@@ -159,6 +163,10 @@ char *generate_address() {
     static const char *suffixes[8] = {"Street", "Lane", "Avenue", "Row", "Route", "Passage", "Boulevard", "Way"};
 
     FILE *name_list = fopen(STREET_LIST, "r");
+    if(name_list == NULL) {
+        printf("File %s failed to open. Please verify your CWD.\n", STREET_LIST);
+        exit(EXIT_FAILURE);
+    }
 
     unsigned int pick = generate_int(1, count_lines(name_list));
     char *name = get_line(name_list, pick);
@@ -187,7 +195,15 @@ char *generate_address() {
 
 char *generate_name() {
     FILE *first_names = fopen(FIRST_NAME_LIST, "r");
+    if(first_names == NULL) {
+        printf("File %s failed to open. Please verify your CWD.\n", FIRST_NAME_LIST);
+        exit(EXIT_FAILURE);
+    }
     FILE *last_names = fopen(LAST_NAME_LIST, "r");
+    if(last_names == NULL) {
+        printf("File %s failed to open. Please verify your CWD.\n", LAST_NAME_LIST);
+        exit(EXIT_FAILURE);
+    }
 
     char *first = get_line(first_names, generate_int(1, count_lines(first_names)));
     char *last = get_line(last_names, generate_int(1, count_lines(last_names)));
