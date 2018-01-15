@@ -18,7 +18,7 @@ unsigned int random_uint() {
 // Inclusive range
 // https://stackoverflow.com/a/17554531/2080712
 unsigned int generate_int(unsigned int lower, unsigned int upper) {
-    int r_uint;
+    unsigned int r_uint;
     const unsigned int range = 1 + (upper - lower);
     const unsigned int buckets = UINT_MAX / range;
     const unsigned int limit = buckets * range;
@@ -90,13 +90,13 @@ struct tm generate_DOB() {
 
     DOB.tm_year = generate_int(0, (unsigned int) current->tm_year);
 
-    if (DOB.tm_year == (unsigned int) current->tm_year) {
+    if (DOB.tm_year == current->tm_year) {
         DOB.tm_mon = generate_int(1, (unsigned int) current->tm_mon);
     } else {
         DOB.tm_mon = generate_int(1, 12);
     }
 
-    if (DOB.tm_mon == (unsigned int) current->tm_mon) {
+    if (DOB.tm_mon == current->tm_mon) {
         DOB.tm_mday = generate_int(1, (unsigned int) current->tm_mday);
     } else {
         DOB.tm_mday = generate_int(1, month_days(DOB.tm_mon, DOB.tm_year));
@@ -209,7 +209,7 @@ char *generate_name() {
 
 char *minimize_str(char *str) {
     char *out = (char *) calloc(strlen(str), sizeof(char));
-    for (int i = 0; i < strlen(str); ++i) {
+    for (size_t i = 0; i < strlen(str); ++i) {
         out[i] = (char) tolower(str[i]);
     }
     return out;
@@ -224,19 +224,19 @@ char *minimize_str(char *str) {
  * @return Number of tokens in dest
  */
 size_t split_str(char *str, const char delim, char ***dest) {
-    if (str == NULL) return NULL;
+    if (str == NULL) return 0;
 
     size_t delim_count = 0;
-    for (int i = 0; i < strlen(str); i++) {
+    for (size_t i = 0; i < strlen(str); i++) {
         if (str[i] == delim) {
             ++delim_count;
         }
     }
     char **tokens = calloc(delim_count + 1, sizeof(char *));
-    if (tokens == NULL) return NULL;
+    if (tokens == NULL) return 0;
 
     char *dup = strdup(str);
-    if (dup == NULL) return NULL;
+    if (dup == NULL) return 0;
 
     char *found;
     delim_count = 0;
@@ -275,7 +275,7 @@ char *generate_email(char *name, struct tm DOB) {
     size_t name_count = split_str(name, ' ', &tokens);
 
     size_t email_size = 0;
-    for (int i = 0; i < name_count; ++i) {
+    for (size_t i = 0; i < name_count; ++i) {
         email_size += strlen(tokens[i]);
     }
     email_size += strlen(provider);
@@ -294,7 +294,7 @@ char *generate_email(char *name, struct tm DOB) {
 
     shuffle(tokens, name_count);
 
-    for (int i = 0; i < name_count; ++i) {
+    for (size_t i = 0; i < name_count; ++i) {
         strcat(email, minimize_str(tokens[i]));
         if ((use_dash && i < name_count - 1) || (use_dash && use_dob)) {
             strcat(email, "-");
