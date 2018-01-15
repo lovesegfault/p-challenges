@@ -4,18 +4,24 @@
 #define FIRST_NAME_LIST  "lists/first_names.txt"
 #define LAST_NAME_LIST  "lists/last_names.txt"
 
+static bool HAS_URANDOM = true; // Global
+
 unsigned int random_uint() {
     unsigned int r_uint;
     FILE *f;
 
     f = fopen("/dev/urandom", "r");
-    if(f == NULL) {
-        printf("Failed loading random generator device /dev/urandom.");
-        exit(EXIT_FAILURE);
+    if (f == NULL) {
+        if (HAS_URANDOM) {
+            printf("---- Failed loading random generator device /dev/urandom. Defaulting to rand().\n");
+            srand((unsigned int) time(NULL));
+            HAS_URANDOM = false;
+        }
+        r_uint = (unsigned int) rand();
+    } else {
+        fread(&r_uint, sizeof(r_uint), 1, f);
+        fclose(f);
     }
-    fread(&r_uint, sizeof(r_uint), 1, f);
-    fclose(f);
-
     return r_uint;
 }
 
@@ -39,7 +45,8 @@ unsigned int generate_int(unsigned int lower, unsigned int upper) {
         r_uint = random_uint();
     } while (r_uint >= limit);
 
-    return lower + (r_uint / buckets);
+    unsigned int res = lower + (r_uint / buckets);
+    return res;
 }
 
 char *generate_SSN() {
@@ -163,7 +170,7 @@ char *generate_address() {
     static const char *suffixes[8] = {"Street", "Lane", "Avenue", "Row", "Route", "Passage", "Boulevard", "Way"};
 
     FILE *name_list = fopen(STREET_LIST, "r");
-    if(name_list == NULL) {
+    if (name_list == NULL) {
         printf("File %s failed to open. Please verify your CWD.\n", STREET_LIST);
         exit(EXIT_FAILURE);
     }
@@ -195,12 +202,12 @@ char *generate_address() {
 
 char *generate_name() {
     FILE *first_names = fopen(FIRST_NAME_LIST, "r");
-    if(first_names == NULL) {
+    if (first_names == NULL) {
         printf("File %s failed to open. Please verify your CWD.\n", FIRST_NAME_LIST);
         exit(EXIT_FAILURE);
     }
     FILE *last_names = fopen(LAST_NAME_LIST, "r");
-    if(last_names == NULL) {
+    if (last_names == NULL) {
         printf("File %s failed to open. Please verify your CWD.\n", LAST_NAME_LIST);
         exit(EXIT_FAILURE);
     }
