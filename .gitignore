@@ -116,7 +116,6 @@ crashlytics-build.properties
 fabric.properties
 
 .idea/
+*/vgcore*
 00-name-generator/.idea/
-00-name-generator/CMakeLists.txt
 00-name-generator/cmake-build-debug/
-00-name-generator/main.c
