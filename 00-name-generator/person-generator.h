@@ -14,7 +14,7 @@ typedef struct _person {
     char *email;
     char *address;
     char *SSN;
-    struct tm DOB;
+    struct tm *DOB;
 
     void (*print)(struct _person *);
 
@@ -23,13 +23,13 @@ typedef struct _person {
 
 char *generate_SSN();
 
-struct tm generate_DOB();
+struct tm *generate_DOB();
 
 char *generate_address();
 
 char *generate_name();
 
-char *generate_email(char *name, struct tm DOB);
+char *generate_email(char *name, struct tm *DOB);
 
 void generate_person(person *);
 

@@ -82,24 +82,24 @@ unsigned int month_days(int month, int year) {
     }
 }
 
-struct tm generate_DOB() {
-    struct tm DOB = {};
+struct tm *generate_DOB() {
+    struct tm *DOB = calloc(1, sizeof(struct tm));
 
     time_t c_time = time(NULL);
     struct tm *current = localtime(&c_time);
 
-    DOB.tm_year = generate_int(0, (unsigned int) current->tm_year);
+    DOB->tm_year = generate_int(0, (unsigned int) current->tm_year);
 
-    if (DOB.tm_year == current->tm_year) {
-        DOB.tm_mon = generate_int(1, (unsigned int) current->tm_mon);
+    if (DOB->tm_year == current->tm_year) {
+        DOB->tm_mon = generate_int(1, (unsigned int) current->tm_mon);
     } else {
-        DOB.tm_mon = generate_int(1, 12);
+        DOB->tm_mon = generate_int(1, 12);
     }
 
-    if (DOB.tm_mon == current->tm_mon) {
-        DOB.tm_mday = generate_int(1, (unsigned int) current->tm_mday);
+    if (DOB->tm_mon == current->tm_mon) {
+        DOB->tm_mday = generate_int(1, (unsigned int) current->tm_mday);
     } else {
-        DOB.tm_mday = generate_int(1, month_days(DOB.tm_mon, DOB.tm_year));
+        DOB->tm_mday = generate_int(1, month_days(DOB->tm_mon, DOB->tm_year));
     }
 
     return DOB;
@@ -263,7 +263,7 @@ void shuffle(char **arr, size_t n) {
     }
 }
 
-char *generate_email(char *name, struct tm DOB) {
+char *generate_email(char *name, struct tm *DOB) {
     bool use_dob = (bool) (random_uint() & 1);
     bool use_dash = (bool) (random_uint() & 1);
 
@@ -286,7 +286,7 @@ char *generate_email(char *name, struct tm DOB) {
     char *year = NULL;
     if (use_dob) {
         year = calloc(3, sizeof(char));
-        strftime(year, 3, "%y", &DOB);
+        strftime(year, 3, "%y", DOB);
         email_size += strlen(year);
     }
 
@@ -322,7 +322,7 @@ void generate_person(person *self) {
 void person_print(person *self) {
     printf("SSN: %s\n", self->SSN);
     char *dob = calloc(11, sizeof(char));
-    strftime(dob, 11, "%F", &(self->DOB));
+    strftime(dob, 11, "%F", self->DOB);
     printf("DOB: %s\n", dob);
     free(dob);
     printf("Address: %s\n", self->address);
@@ -336,4 +336,5 @@ void person_kill(person *self) {
     free(self->SSN);
     free(self->name);
     free(self->email);
+    free(self->DOB);
 }
