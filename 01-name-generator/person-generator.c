@@ -291,18 +291,23 @@ char *generate_email(char *name, struct tm *DOB) {
     bool use_dob = (bool) (random_uint() & 1);
     bool use_dash = (bool) (random_uint() & 1);
 
+    use_dob = false;
+    use_dash = false;
+
     const char *providers[3] = {"@gmail.com", "@hotmail.com", "@yahoo.com"};
 
     char *provider = (char *) providers[generate_int(0, 2)];
 
     char **tokens;
     size_t name_count = split_str(name, ' ', &tokens);
-
+    printf("---- name_count=%zu\n", name_count);
     size_t email_size = 1;
     for (size_t i = 0; i < name_count; ++i) {
         email_size += strlen(tokens[i]);
     }
+    printf("---- names size=%zu\n", email_size);
     email_size += strlen(provider);
+    printf("---- strlen(provider)=%zu\n", strlen(provider));
     if (use_dash) {
         email_size += name_count - 1;
     }
