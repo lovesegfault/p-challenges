@@ -1,0 +1,58 @@
+{
+  "variant": {
+    "label": "Debug",
+    "keywordSettings": {
+      "buildType": "debug"
+    },
+    "description": "Emit debug information without performing optimizations"
+  },
+  "activeEnvironments": [],
+  "codeModel": {
+    "configurations": [
+      {
+        "name": "Debug",
+        "projects": [
+          {
+            "buildDirectory": "/home/bemeurer/src/c-challenges/00-name-generator/build",
+            "name": "00_name_generator",
+            "sourceDirectory": "/home/bemeurer/src/c-challenges/00-name-generator",
+            "targets": [
+              {
+                "artifacts": [
+                  "/home/bemeurer/src/c-challenges/00-name-generator/build/00-name-generator"
+                ],
+                "buildDirectory": "/home/bemeurer/src/c-challenges/00-name-generator/build",
+                "fileGroups": [
+                  {
+                    "isGenerated": false,
+                    "sources": [
+                      "name-generator.h"
+                    ]
+                  },
+                  {
+                    "compileFlags": "-g   -std=gnu99",
+                    "isGenerated": false,
+                    "language": "C",
+                    "sources": [
+                      "main.c",
+                      "name-generator.c"
+                    ]
+                  }
+                ],
+                "fullName": "00-name-generator",
+                "linkLanguageFlags": "-g",
+                "linkerLanguage": "C",
+                "name": "00-name-generator",
+                "sourceDirectory": "/home/bemeurer/src/c-challenges/00-name-generator",
+                "type": "EXECUTABLE"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "cookie": "0.4556697578610931",
+    "inReplyTo": "codemodel",
+    "type": "reply"
+  }
+}
