@@ -29,6 +29,10 @@ unsigned int random_uint() {
 unsigned int generate_int(unsigned int lower, unsigned int upper) {
     unsigned int r_uint;
     const unsigned int range = 1 + (upper - lower);
+    if(range == 0) {
+        fprintf(stderr, "Invalid range!\n---- upper=%d\n---- lower=%d\n---- range=%d\n", upper, lower, range);
+        exit(EXIT_FAILURE);
+    }
     const unsigned int buckets = UINT_MAX / range;
     const unsigned int limit = buckets * range;
 
@@ -51,7 +55,7 @@ unsigned int generate_int(unsigned int lower, unsigned int upper) {
 char *generate_SSN() {
     char *SSN = calloc(10, sizeof(char)); // 9 SSN digits + \0
     if (SSN == NULL) {
-        printf("---- Failed allocating SSN buffer.\n");
+        fprintf(stderr, "Failed allocating SSN buffer.\n");
         exit(EXIT_FAILURE);
     }
     size_t group_number;
@@ -174,7 +178,7 @@ char *generate_address() {
 
     FILE *name_list = fopen(STREET_LIST, "r");
     if (name_list == NULL) {
-        printf("File %s failed to open. Please verify your CWD.\n", STREET_LIST);
+        fprintf(stderr, "File %s failed to open. Please verify your CWD.\n", STREET_LIST);
         exit(EXIT_FAILURE);
     }
 
@@ -206,12 +210,12 @@ char *generate_address() {
 char *generate_name() {
     FILE *first_names = fopen(FIRST_NAME_LIST, "r");
     if (first_names == NULL) {
-        printf("File %s failed to open. Please verify your CWD.\n", FIRST_NAME_LIST);
+        fprintf(stderr, "File %s failed to open. Please verify your CWD.\n", FIRST_NAME_LIST);
         exit(EXIT_FAILURE);
     }
     FILE *last_names = fopen(LAST_NAME_LIST, "r");
     if (last_names == NULL) {
-        printf("File %s failed to open. Please verify your CWD.\n", LAST_NAME_LIST);
+        fprintf(stderr, "File %s failed to open. Please verify your CWD.\n", LAST_NAME_LIST);
         exit(EXIT_FAILURE);
     }
 
@@ -291,8 +295,6 @@ char *generate_email(char *name, struct tm *DOB) {
     bool use_dob = (bool) (random_uint() & 1);
     bool use_dash = (bool) (random_uint() & 1);
 
-    use_dob = false;
-    use_dash = false;
 
     const char *providers[3] = {"@gmail.com", "@hotmail.com", "@yahoo.com"};
 
@@ -300,14 +302,11 @@ char *generate_email(char *name, struct tm *DOB) {
 
     char **tokens;
     size_t name_count = split_str(name, ' ', &tokens);
-    printf("---- name_count=%zu\n", name_count);
     size_t email_size = 1;
     for (size_t i = 0; i < name_count; ++i) {
         email_size += strlen(tokens[i]);
     }
-    printf("---- names size=%zu\n", email_size);
     email_size += strlen(provider);
-    printf("---- strlen(provider)=%zu\n", strlen(provider));
     if (use_dash) {
         email_size += name_count - 1;
     }
@@ -317,6 +316,10 @@ char *generate_email(char *name, struct tm *DOB) {
         year = calloc(3, sizeof(char));
         strftime(year, 3, "%y", DOB);
         email_size += strlen(year);
+    }
+
+    if (use_dash && use_dob) {
+        email_size += 1;
     }
 
     char *email = calloc(email_size, sizeof(char));
@@ -337,21 +340,16 @@ char *generate_email(char *name, struct tm *DOB) {
         free(year);
     }
     strcat(email, provider);
-
+    fflush(stdout);
     return email;
 }
 
 void generate_person(person *self) {
-    self->address = NULL;
-    //self->name = NULL;
-    //self->email = NULL;
-    self->SSN = NULL;
-
-    //self->address = generate_address();
+    self->address = generate_address();
     self->DOB = generate_DOB();
     self->name = generate_name();
     self->email = generate_email(self->name, self->DOB);
-    //self->SSN = generate_SSN();
+    self->SSN = generate_SSN();
 
     self->print = person_print;
     self->kill = person_kill;

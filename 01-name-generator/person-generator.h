@@ -1,13 +1,13 @@
 #ifndef INC_00_NAME_GENERATOR_NAME_GENERATOR_H
 #define INC_00_NAME_GENERATOR_NAME_GENERATOR_H
 
-#include <string.h>
 #include <ctype.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
-#include <limits.h>
 
 typedef struct _person {
     char *name;
