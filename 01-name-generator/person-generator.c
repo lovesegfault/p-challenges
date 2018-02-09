@@ -114,7 +114,7 @@ struct tm *generate_DOB() {
         DOB->tm_mon = generate_int(0, 11);
     }
 
-    if (DOB->tm_mon == current->tm_mon) {
+    if ((DOB->tm_year == current->tm_year) && (DOB->tm_mon == current->tm_mon)) {
         DOB->tm_mday = generate_int(1, (unsigned int) current->tm_mday);
     } else {
         DOB->tm_mday = generate_int(1, month_days(DOB->tm_mon, DOB->tm_year));
