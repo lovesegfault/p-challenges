@@ -109,9 +109,9 @@ struct tm *generate_DOB() {
     DOB->tm_year = generate_int(0, (unsigned int) current->tm_year);
 
     if (DOB->tm_year == current->tm_year) {
-        DOB->tm_mon = generate_int(1, (unsigned int) current->tm_mon);
+        DOB->tm_mon = generate_int(0, (unsigned int) current->tm_mon);
     } else {
-        DOB->tm_mon = generate_int(1, 12);
+        DOB->tm_mon = generate_int(0, 11);
     }
 
     if (DOB->tm_mon == current->tm_mon) {
