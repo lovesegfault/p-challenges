@@ -29,17 +29,17 @@ unsigned int random_uint() {
 unsigned int generate_int(unsigned int lower, unsigned int upper) {
     unsigned int r_uint;
     const unsigned int range = 1 + (upper - lower);
-    if(range == 0) {
+    if (range == 0) {
         fprintf(stderr, "Invalid range!\n---- upper=%d\n---- lower=%d\n---- range=%d\n", upper, lower, range);
         exit(EXIT_FAILURE);
     }
-    const unsigned int buckets = UINT_MAX / range;
-    const unsigned int limit = buckets * range;
-
     if (range >= UINT_MAX) {
         fprintf(stderr, "Range too big!\n");
         exit(EXIT_FAILURE);
     }
+
+    const unsigned int buckets = UINT_MAX / range;
+    const unsigned int limit = buckets * range;
 
     /* Create equal size buckets all in a row, then fire randomly towards
      * the buckets until you land in one of them. All buckets are equally
@@ -264,7 +264,10 @@ size_t split_str(char *str, const char delim, char ***dest) {
     if (tokens == NULL) return 0;
 
     char *dup = strdup(str);
-    if (dup == NULL) return 0;
+    if (dup == NULL) {
+        free(tokens);
+        return 0;
+    }
 
     char *found = NULL;
     delim_count = 0;
