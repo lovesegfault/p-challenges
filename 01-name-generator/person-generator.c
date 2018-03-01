@@ -8,16 +8,18 @@ static bool HAS_URANDOM = true; // Global
 
 unsigned int random_uint() {
     unsigned int r_uint;
-
+    // Try to open the random generator device
     FILE *f = fopen("/dev/urandom", "r");
     if (f == NULL) {
         if (HAS_URANDOM) {
+            // Warn that urandom isn't working, but fallthrough to rand()
             printf("---- Failed loading random generator device /dev/urandom. Defaulting to rand().\n");
             srand((unsigned int) time(NULL));
             HAS_URANDOM = false;
         }
         r_uint = (unsigned int) rand();
     } else {
+        // If we have urandom, just read from it and cast to uint
         fread(&r_uint, sizeof(r_uint), 1, f);
         fclose(f);
     }
@@ -27,14 +29,14 @@ unsigned int random_uint() {
 // Inclusive range
 // https://stackoverflow.com/a/17554531/2080712
 unsigned int generate_int(unsigned int lower, unsigned int upper) {
+    if (upper - lower == UINT_MAX) {
+        fprintf(stderr, "Invalid bounds on generate_int().\n");
+        exit(EXIT_FAILURE);
+    }
     unsigned int r_uint;
     const unsigned int range = 1 + (upper - lower);
     if (range == 0) {
         fprintf(stderr, "Invalid range!\n---- upper=%d\n---- lower=%d\n---- range=%d\n", upper, lower, range);
-        exit(EXIT_FAILURE);
-    }
-    if (range >= UINT_MAX) {
-        fprintf(stderr, "Range too big!\n");
         exit(EXIT_FAILURE);
     }
 
@@ -58,25 +60,26 @@ char *generate_SSN() {
         fprintf(stderr, "Failed allocating SSN buffer.\n");
         exit(EXIT_FAILURE);
     }
-    size_t group_number;
-    size_t serial_number;
-    size_t lead_number;
+    // A social security number is composed of:
+    size_t group_number; // A group number (2 digits)
+    size_t serial_number; // A serial number (4 digits)
+    size_t lead_number; // A lead number (3 digits)
 
     do {
         group_number = generate_int(1, 99);
-    } while (group_number == 0);
+    } while (group_number == 0); // The group number cannot be 0
 
     do {
         serial_number = generate_int(1, 9999);
-    } while (serial_number == 0);
+    } while (serial_number == 0); // The serial number cannot be 0
 
     do {
         lead_number = generate_int(1, 999);
-    } while ((lead_number == 666) || (lead_number > 900));
+    } while ((lead_number == 666) || (lead_number > 900)); // Lead number cannot be 666 or >900 for reasons?
 
-    snprintf(SSN, 10, "%03zu%02zu%04zu",
-             lead_number, group_number, serial_number);
+    snprintf(SSN, 10, "%03zu%02zu%04zu", lead_number, group_number, serial_number); // Format with appropriate padding
 
+    // There are known invalid SSNs, if they are generated, try again
     static const char *know_ad = "219099999";
     static const char *woolworth = "219099999";
 
@@ -88,37 +91,12 @@ char *generate_SSN() {
     return (SSN);
 }
 
-unsigned int month_days(int month, int year) {
-    if (month == 4 || month == 6 || month == 9 || month == 11) {
-        return 30;
-    } else if (month == 2) {
-        bool isLeap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-        if (isLeap) return 29;
-        return 28;
-    } else {
-        return 31;
-    }
-}
-
 struct tm *generate_DOB() {
-    struct tm *DOB = calloc(1, sizeof(struct tm));
+    time_t t = time(NULL); // Current time
+    time_t pick = (time_t) (generate_int(0, (unsigned int) (t))); // Picking a random moment
 
-    time_t c_time = time(NULL);
-    struct tm *current = localtime(&c_time);
-
-    DOB->tm_year = generate_int(0, (unsigned int) current->tm_year);
-
-    if (DOB->tm_year == current->tm_year) {
-        DOB->tm_mon = generate_int(0, (unsigned int) current->tm_mon);
-    } else {
-        DOB->tm_mon = generate_int(0, 11);
-    }
-
-    if ((DOB->tm_year == current->tm_year) && (DOB->tm_mon == current->tm_mon)) {
-        DOB->tm_mday = generate_int(1, (unsigned int) current->tm_mday);
-    } else {
-        DOB->tm_mday = generate_int(1, month_days(DOB->tm_mon, DOB->tm_year));
-    }
+    struct tm *DOB = malloc(sizeof(struct tm));
+    localtime_r(&pick, DOB); // Instantiate a tm from our pick
 
     return DOB;
 }
@@ -128,7 +106,7 @@ unsigned int count_lines(FILE *file) {
 
     int ch;
     unsigned int line_count = 0;
-
+    // Walk through file counting \n
     while ((ch = getc(file)) != EOF) {
         if (ch == '\n') ++line_count;
     }
@@ -176,19 +154,22 @@ char *get_line(FILE *file, unsigned int line_number) {
 char *generate_address() {
     static const char *suffixes[8] = {"Street", "Lane", "Avenue", "Row", "Route", "Passage", "Boulevard", "Way"};
 
+    // Get out street name list
     FILE *name_list = fopen(STREET_LIST, "r");
     if (name_list == NULL) {
         fprintf(stderr, "File %s failed to open. Please verify your CWD.\n", STREET_LIST);
         exit(EXIT_FAILURE);
     }
 
+    // Pick a line from the list and store it
     unsigned int pick = generate_int(1, count_lines(name_list));
     char *name = get_line(name_list, pick);
 
     fclose(name_list);
 
-    const char *suf = suffixes[generate_int(0, 7)];
-    size_t sz = (strlen(name) + strlen(suf) + 3 + 4);
+    const char *suf = suffixes[generate_int(0, 7)]; // Pick a suffix
+    size_t sz = (strlen(name) + strlen(suf) + 3 + 4); // Compute length
+    //           ^ Name         ^ Suffix      ^---^ Spaces and Street number
     char *street = calloc(sz, sizeof(char));
     strncpy(street, suf, sz * sizeof(char));
 
@@ -197,6 +178,7 @@ char *generate_address() {
 
     free(name);
 
+    // Generate street number, add it to address
     char *number = calloc(5, sizeof(char));
     sprintf(number, "%d", generate_int(1, 9999));
 
@@ -208,6 +190,7 @@ char *generate_address() {
 }
 
 char *generate_name() {
+    // Open first and last names list
     FILE *first_names = fopen(FIRST_NAME_LIST, "r");
     if (first_names == NULL) {
         fprintf(stderr, "File %s failed to open. Please verify your CWD.\n", FIRST_NAME_LIST);
@@ -219,10 +202,14 @@ char *generate_name() {
         exit(EXIT_FAILURE);
     }
 
+    // Pick random first and last names
     char *first = get_line(first_names, generate_int(1, count_lines(first_names)));
     char *last = get_line(last_names, generate_int(1, count_lines(last_names)));
+    fclose(first_names);
+    fclose(last_names);
 
     size_t sz = strlen(first) + strlen(last) + 2;
+    //          ^ First name    ^ Last name    ^ Spaces
 
     char *name = (char *) calloc(sz, sizeof(char));
     strncpy(name, first, sz * sizeof(char));
@@ -232,8 +219,7 @@ char *generate_name() {
 
     free(first);
     free(last);
-    fclose(first_names);
-    fclose(last_names);
+
     return name;
 }
 
