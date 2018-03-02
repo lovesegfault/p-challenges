@@ -53,3 +53,11 @@ void fifo_free(fifo_t **queue) {
     }
     free(*queue);
 }
+
+/***************************************************** Tests **********************************************************/
+
+#include "../snow/snow/snow.h"
+
+#define setup()\
+    fifo_t *queue = fifo_init(); \
+    defer(queue)
