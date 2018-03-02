@@ -1,0 +1,3 @@
+[submodule "snow"]
+	path = snow
+	url = git@github.com:mortie/snow.git
