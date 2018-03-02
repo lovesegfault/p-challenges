@@ -1,4 +1,3 @@
-# Created by .ignore support plugin (hsz.mobi)
 ### C template
 # Prerequisites
 *.d
@@ -115,7 +114,6 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+.vscode/
 .idea/
 */vgcore*
-00-name-generator/.idea/
-00-name-generator/cmake-build-debug/
