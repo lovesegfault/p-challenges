@@ -34,5 +34,5 @@ target_link_libraries(main pthread fifo input base64 output)
 
 # Tests
 add_executable(tests src/tests.c)
-target_link_libraries(tests fifo)
+target_link_libraries(tests fifo ${CURSES_LIBRARIES})
 

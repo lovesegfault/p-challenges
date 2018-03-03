@@ -12,7 +12,7 @@ void *output_file_loop(void *arg){
     while (true) {
         if(bus->kill)
             break;
-        if(fifo->count(fifo) > 0){
+        if(fifo->count_mutex(fifo) > 0){
             char *c = (char*)(fifo->dequeue(fifo));
             fprintf(out, "%c", *c);
             free(c);

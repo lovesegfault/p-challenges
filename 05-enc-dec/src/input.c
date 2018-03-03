@@ -5,8 +5,8 @@
 #define KEY_ESC 27
 #define KEY_LF 10
 
-void *stdin_loop(void *queue) {
-    bus_t *bus = (bus_t*)(queue);
+void *stdin_loop(void *arg) {
+    bus_t *bus = (bus_t *) (arg);
     fifo_t *fifo = bus->input;
     initscr();
     keypad(stdscr, TRUE);
@@ -14,10 +14,10 @@ void *stdin_loop(void *queue) {
     noecho();
 
     uint8_t *ch = calloc(1, sizeof(uint8_t));
-    while((*ch = (uint8_t)getch())) {
+    while ((*ch = (uint8_t) getch())) {
         if (*ch == KEY_EOT || *ch == KEY_ESC)
             break;
-        if ((*ch >= 0 && *ch <=31 && *ch != KEY_LF))
+        if ((*ch >= 0 && *ch <= 31 && *ch != KEY_LF))
             continue;
         printw("%c", *ch);
         fifo->enqueue(fifo, ch);
@@ -27,4 +27,19 @@ void *stdin_loop(void *queue) {
     bus->kill = true;
     endwin();
     return (NULL);
+}
+
+void *debug_loop(void *arg) {
+    bus_t *bus = (bus_t *) (arg);
+    fifo_t *fifo = bus->input;
+
+    int c;
+    while ((c = getchar()), c != EOF) {
+        printf("%c", c);
+        uint8_t *byte = calloc(1, sizeof(uint8_t));
+        *byte = (uint8_t) (c);
+        fifo->enqueue(fifo, byte);
+    }
+    bus->kill = true;
+    return NULL;
 }

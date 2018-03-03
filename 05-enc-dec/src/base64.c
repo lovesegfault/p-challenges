@@ -9,8 +9,8 @@ void *process_loop(void *arg){
             break;
         }
 
-        if(bus->input->count(bus->input) >= 3 && !bus->kill) {
-           // fifo_debug_print(bus->input);
+        if(bus->input->count_mutex(bus->input) >= 3 && !bus->kill) {
+           //fifo_debug_print(bus->input);
             for(int i = 0; i < 3; ++i)
                 bus->output->enqueue(bus->output, bus->input->dequeue(bus->input));
         }

@@ -6,10 +6,11 @@ fifo_t *fifo_init() {
     queue->first = NULL;
     queue->mutex = calloc(1, sizeof(pthread_mutex_t));
     pthread_mutex_init(queue->mutex, NULL);
+    queue->count = 0;
 
+    queue->count_mutex = fifo_count;
     queue->enqueue = fifo_enqueue;
     queue->dequeue = fifo_dequeue;
-    queue->count = fifo_count;
     queue->free = fifo_free;
     return queue;
 }
@@ -24,6 +25,7 @@ void fifo_enqueue(fifo_t *queue, uint8_t *data) {
     // FIXME: Is this correct / desired?
     if (queue->first == NULL) {
         queue->first = queue->last = new_elem;
+        ++queue->count;
         pthread_mutex_unlock(queue->mutex);
         return;
     }
@@ -31,6 +33,7 @@ void fifo_enqueue(fifo_t *queue, uint8_t *data) {
     new_elem->next->prev = new_elem;
 
     queue->last = new_elem;
+    ++queue->count;
     pthread_mutex_unlock(queue->mutex);
 }
 
@@ -45,6 +48,7 @@ uint8_t *fifo_dequeue(fifo_t *queue) {
     queue->first = queue->first->prev;
     uint8_t *data = first->data;
     free(first);
+    --queue->count;
     pthread_mutex_unlock(queue->mutex);
     return data;
 }
@@ -68,6 +72,13 @@ void fifo_free(fifo_t **queue, bool free_data) {
 }
 
 size_t fifo_count(fifo_t *queue) {
+    pthread_mutex_lock(queue->mutex);
+    size_t res = queue->count;
+    pthread_mutex_unlock(queue->mutex);
+    return res;
+}
+
+size_t fifo_debug_count(fifo_t *queue) {
     pthread_mutex_lock(queue->mutex);
     size_t count = 0;
     node_t *current = queue->first;
@@ -106,9 +117,9 @@ bool test_fifo_initialize() {
     return test_result;
 }
 
-bool test_fifo_count() {
+bool test_fifo_debug_count() {
     fifo_t *fifo = fifo_init();
-    size_t count = fifo->count(fifo);
+    size_t count = fifo_debug_count(fifo);
     fifo->free(&fifo, false);
     return count == 0;
 }
@@ -122,7 +133,7 @@ bool test_fifo_empty_enqueue() {
     fifo_t *fifo = fifo_init();
     fifo->enqueue(fifo, byte);
 
-    size_t count = fifo->count(fifo);
+    size_t count = fifo->count;
 
     bool test_result = (*(fifo->first->data) == *(fifo->last->data));
     test_result &= *fifo->first->data == 127;
@@ -156,7 +167,7 @@ bool test_fifo_singleton_dequeue() {
 
     fifo->enqueue(fifo, byte);
     uint8_t data = *fifo->dequeue(fifo);
-    size_t count = fifo->count(fifo);
+    size_t count = fifo->count;
     fifo->free(&fifo, false);
     free(byte);
     return (count == 0) && (data == 253);
@@ -184,7 +195,7 @@ bool test_fifo_multiple_enqueues() {
         ++bytes_idx;
     }
     if (test_result) {
-        test_result &= fifo->count(fifo) == SAMPLE_SIZE;
+        test_result &= fifo->count == SAMPLE_SIZE;
     }
 
     free(bytes);
@@ -211,7 +222,7 @@ bool test_fifo_multiple_dequeues() {
         test_result &= (data == bytes[i]);
     }
     if (test_result) {
-        test_result &= (fifo->count(fifo) == 0);
+        test_result &= (fifo->count == 0);
     }
 
     free(bytes);

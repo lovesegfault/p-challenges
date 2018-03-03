@@ -15,12 +15,14 @@ typedef struct NODE {
 typedef struct FIFO {
     node_t *first;
     node_t *last;
+
+    size_t count;
     pthread_mutex_t *mutex;
 
+    size_t (*count_mutex)(struct FIFO*);
     void (*enqueue)(struct FIFO*, uint8_t*);
     uint8_t* (*dequeue)(struct FIFO*);
     void (*free)(struct FIFO**, bool);
-    size_t (*count)(struct FIFO*);
 } fifo_t;
 
 typedef struct {
@@ -33,8 +35,9 @@ fifo_t *fifo_init();
 void fifo_enqueue(fifo_t *queue, uint8_t *data);
 uint8_t *fifo_dequeue(fifo_t *queue);
 void fifo_free(fifo_t **queue, bool free_data);
-
 size_t fifo_count(fifo_t *queue);
+
+size_t fifo_debug_count(fifo_t *queue);
 void fifo_debug_print(fifo_t *queue);
 
 #ifndef TESTS_DISABLED
@@ -43,7 +46,7 @@ void fifo_debug_print(fifo_t *queue);
 
 bool test_fifo_initialize();
 
-bool test_fifo_count();
+bool test_fifo_debug_count();
 
 bool test_fifo_empty_enqueue();
 

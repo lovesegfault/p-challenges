@@ -145,7 +145,7 @@ void fifo_tests() {
     section("FIFO");
     result_t results = {};
     assert("Initializing FIFO", test_fifo_initialize, &results);
-    assert("Counting FIFO", test_fifo_count, &results);
+    assert("Counting FIFO", test_fifo_debug_count, &results);
     assert("Enqueuing empty FIFO", test_fifo_empty_enqueue, &results);
     assert("Dequeuing empty FIFO", test_fifo_empty_dequeue, &results);
     assert("Freeing empty FIFO", test_fifo_empty_free, &results);
