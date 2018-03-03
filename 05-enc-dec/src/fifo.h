@@ -2,6 +2,7 @@
 #define INC_05_ENC_DEC_FIFO_H
 #include <stdint.h>
 #include <stdbool.h>
+#include <pthread.h>
 #include <jemalloc/jemalloc.h>
 
 typedef struct NODE {
@@ -13,6 +14,7 @@ typedef struct NODE {
 typedef struct FIFO {
     node_t *first;
     node_t *last;
+    pthread_mutex_t *mutex;
 
     void (*enqueue)(struct FIFO*, uint8_t*);
     uint8_t* (*dequeue)(struct FIFO*);

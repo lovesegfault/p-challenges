@@ -2,12 +2,16 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <sys/time.h>
 
 #include "fifo.h"
+
+typedef bool (*test_fn)();
 
 typedef struct {
     size_t succeeded;
     size_t failed;
+    long double total;
 } result_t;
 
 typedef enum {
@@ -89,46 +93,66 @@ void printc(color_t c, const char *format, ...) {
     free(colored);
 }
 
+
+double elapsed_micros(struct timeval start, struct timeval end) {
+    double start_micros, end_micros;
+    start_micros = (double)(start.tv_sec*(1000000)) + (double)(start.tv_usec);
+    end_micros = (double)(end.tv_sec*(1000000)) + (double)(end.tv_usec);
+
+    return end_micros - start_micros;
+}
+
 void section(const char *name) {
     printc(BLUE, "Testing ");
     printc(BLUE_B, name);
     printc(BLUE, ":\n");
 }
 
-bool assert(const char *name, bool result, result_t *results) {
-    if (result) {
-        printc(GREEN_B, "✓ ");
-        printc(GREEN, "SUCCESS: ");
-        ++(results->succeeded);
-    } else {
-        printc(RED_B, "✕m");
-        printc(RED, "FAIL: ");
-        ++(results->failed);
-    }
-    printc(YELLOW_B, "%s\n", name);
-    return result;
-}
-
 void assert_section(const char *name, result_t *results) {
+    printc(BLUE, "    » ");
     printc(BLUE_B, "%s", name);
-    printc(BLUE, ": ");
+    printc(BLUE, " | ");
     color_t status = (results->failed > 0) ? RED_B : GREEN_B;
     size_t total = results->failed + results->succeeded;
-    printc(status, "PASSED %zu/%zu\n", results->succeeded, total);
+    printc(status, "PASSED %zu/%zu", results->succeeded, total);
+    printc(BLUE, " | TOOK %Lf\n", results->total / 1000000);
+}
+
+bool assert(const char *name, test_fn test, result_t *results) {
+    struct timeval start, end;
+    gettimeofday(&start, 0);
+    bool result = (*test)();
+    gettimeofday(&end, 0);
+
+    long double elapsed = elapsed_micros(start, end);
+    results->total += elapsed;
+
+    if (result) {
+        printc(GREEN_B, "    ✓ ");
+        printc(GREEN, "SUCCESS");
+        ++(results->succeeded);
+    } else {
+        printc(RED_B, "    ✕ ");
+        printc(RED, "FAIL");
+        ++(results->failed);
+    }
+    printc(BLUE, " | TOOK %Lf | ", elapsed / 1000000);
+    printc(YELLOW_B, "%s\n", name);
+    return result;
 }
 
 void fifo_tests() {
     section("FIFO");
     result_t results = {};
-    assert("Initializing FIFO", test_fifo_initialize(), &results);
-    assert("Counting FIFO", test_fifo_count(), &results);
-    assert("Enqueuing empty FIFO", test_fifo_empty_enqueue(), &results);
-    assert("Dequeuing empty FIFO", test_fifo_empty_dequeue(), &results);
-    assert("Freeing empty FIFO", test_fifo_empty_free(), &results);
-    assert("Dequeuing Singleton FIFO", test_fifo_singleton_dequeue(), &results);
-    assert("Multiple enqueues", test_fifo_multiple_enqueues(), &results);
-    assert("Multiple dequeues", test_fifo_multiple_dequeues(), &results);
-    assert("Freeing FIFO", test_fifo_free(), &results);
+    assert("Initializing FIFO", test_fifo_initialize, &results);
+    assert("Counting FIFO", test_fifo_count, &results);
+    assert("Enqueuing empty FIFO", test_fifo_empty_enqueue, &results);
+    assert("Dequeuing empty FIFO", test_fifo_empty_dequeue, &results);
+    assert("Freeing empty FIFO", test_fifo_empty_free, &results);
+    assert("Dequeuing Singleton FIFO", test_fifo_singleton_dequeue, &results);
+    assert("Multiple enqueues", test_fifo_multiple_enqueues, &results);
+    assert("Multiple dequeues", test_fifo_multiple_dequeues, &results);
+    assert("Freeing FIFO", test_fifo_free, &results);
     assert_section("FIFO", &results);
 }
 

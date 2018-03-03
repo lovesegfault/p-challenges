@@ -4,6 +4,8 @@ fifo_t *fifo_init() {
     fifo_t *queue = calloc(1, sizeof(fifo_t));
     queue->last = NULL;
     queue->first = NULL;
+    queue->mutex = NULL;
+    pthread_mutex_init(queue->mutex, NULL);
 
     queue->enqueue = fifo_enqueue;
     queue->dequeue = fifo_dequeue;
@@ -13,6 +15,7 @@ fifo_t *fifo_init() {
 }
 
 void fifo_enqueue(fifo_t *queue, uint8_t *data) {
+    pthread_mutex_lock(queue->mutex);
     // Allocate the node
     node_t *new_elem = calloc(1, sizeof(node_t));
     new_elem->data = data; // Link data
@@ -27,9 +30,11 @@ void fifo_enqueue(fifo_t *queue, uint8_t *data) {
     new_elem->next->prev = new_elem;
 
     queue->last = new_elem;
+    pthread_mutex_unlock(queue->mutex);
 }
 
 uint8_t *fifo_dequeue(fifo_t *queue) {
+    pthread_mutex_lock(queue->mutex);
     if (queue->first == NULL) {
         return NULL;
     }
@@ -38,10 +43,12 @@ uint8_t *fifo_dequeue(fifo_t *queue) {
     queue->first = queue->first->prev;
     uint8_t *data = first->data;
     free(first);
+    pthread_mutex_unlock(queue->mutex);
     return data;
 }
 
 void fifo_free(fifo_t **queue, bool free_data) {
+    pthread_mutex_lock((*queue)->mutex);
     node_t *current;
     while ((current = (*queue)->first) != NULL) {
         (*queue)->first = (*queue)->first->next;
@@ -51,17 +58,20 @@ void fifo_free(fifo_t **queue, bool free_data) {
         }
         free(current);
     }
+    pthread_mutex_destroy((*queue)->mutex);
     free(*queue);
     *queue = NULL;
 }
 
 size_t fifo_count(fifo_t *queue) {
+    pthread_mutex_lock(queue->mutex);
     size_t count = 0;
     node_t *current = queue->first;
     while (current != NULL) {
         ++count;
         current = current->prev;
     }
+    pthread_mutex_unlock(queue->mutex);
     return count;
 }
 
