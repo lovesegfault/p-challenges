@@ -24,6 +24,7 @@ void fifo_enqueue(fifo_t *queue, uint8_t *data) {
     // FIXME: Is this correct / desired?
     if (queue->first == NULL) {
         queue->first = queue->last = new_elem;
+        pthread_mutex_unlock(queue->mutex);
         return;
     }
     new_elem->next = queue->last; // It is inserted last in the list
@@ -36,6 +37,7 @@ void fifo_enqueue(fifo_t *queue, uint8_t *data) {
 uint8_t *fifo_dequeue(fifo_t *queue) {
     pthread_mutex_lock(queue->mutex);
     if (queue->first == NULL) {
+        pthread_mutex_unlock(queue->mutex);
         return NULL;
     }
 
