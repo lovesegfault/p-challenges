@@ -1,21 +1,34 @@
-#include "input.h"
-#include "fifo.h"
 #include <pthread.h>
+#include "fifo.h"
+#include "input.h"
+#include "base64.h"
+#include "output.h"
 
 int main(int argc, char **argv) {
+    // FIFO's
+    bus_t *bus = calloc(1, sizeof(bus_t));
+    bus->input = fifo_init();
+    bus->output = fifo_init();
+
     // Create input thread
     pthread_t input;
-    pthread_create(&input, NULL, stdin_mode, NULL);
-
-    // Input FIFO
-    fifo_t *in_fifo = fifo_init();
+    pthread_create(&input, NULL, stdin_loop, bus);
 
     // Process thread
-
-    // Output FIFO
-    fifo_t *out_fifo = fifo_init();
+    pthread_t process;
+    pthread_create(&process, NULL, process_loop, bus);
 
     // Output thread
+    pthread_t output;
+    pthread_create(&output, NULL, output_file_loop, bus);
+
+    pthread_join(input, NULL);
+    pthread_join(process, NULL);
+    pthread_join(output, NULL);
+
+    bus->input->free(&(bus->input), true);
+    bus->output->free(&(bus->output), true);
+    //free(bus);
     return 0;
 }
 

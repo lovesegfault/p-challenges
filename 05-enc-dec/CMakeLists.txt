@@ -30,7 +30,7 @@ add_library(output src/output.h src/output.c)
 # CLI
 add_executable(main src/main.c)
 set_target_properties(main PROPERTIES COMPILE_FLAGS "-DTESTS_DISABLED")
-target_link_libraries(main pthread fifo input)
+target_link_libraries(main pthread fifo input base64 output)
 
 # Tests
 add_executable(tests src/tests.c)

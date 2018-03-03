@@ -4,7 +4,7 @@ fifo_t *fifo_init() {
     fifo_t *queue = calloc(1, sizeof(fifo_t));
     queue->last = NULL;
     queue->first = NULL;
-    queue->mutex = NULL;
+    queue->mutex = calloc(1, sizeof(pthread_mutex_t));
     pthread_mutex_init(queue->mutex, NULL);
 
     queue->enqueue = fifo_enqueue;
@@ -61,7 +61,8 @@ void fifo_free(fifo_t **queue, bool free_data) {
         free(current);
     }
     pthread_mutex_unlock((*queue)->mutex);
-    pthread_mutex_destroy((*queue)->mutex);
+    pthread_mutex_destroy(((*queue)->mutex));
+    free((*queue)->mutex);
     free(*queue);
     *queue = NULL;
 }
@@ -76,6 +77,19 @@ size_t fifo_count(fifo_t *queue) {
     }
     pthread_mutex_unlock(queue->mutex);
     return count;
+}
+
+void fifo_debug_print(fifo_t *queue) {
+    pthread_mutex_lock(queue->mutex);
+    node_t *idx = queue->first;
+    while (idx != NULL) {
+        if(idx->prev)
+            printw("<-");
+        printw(" [%c] ", (char)*(idx->data));
+        if(idx->next)
+            printw("->");
+    }
+    printw("\n");
 }
 
 /*
