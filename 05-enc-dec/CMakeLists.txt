@@ -5,7 +5,9 @@ find_library(jemalloc_lib jemalloc)
 find_library(pthread_lib pthread)
 set(jemalloc_libs ${jemalloc_lib} ${pthread_lib})
 
-set(CMAKE_C_FLAGS "-std=c99 -O2 -mtune=native -march=native -Wall -Wextra -Wformat-security -Wmissing-include-dirs -Wuninitialized -Wtrampolines -Wlogical-op -Wno-unused-parameter -Werror=delete-non-virtual-dtor -Werror=return-type -Werror=implicit -g")
+set(CMAKE_C_FLAGS_DEBUG  "-std=c99 -Wall -Wextra -Wformat-security -Wmissing-include-dirs -Wuninitialized -Wtrampolines -Wlogical-op -Wno-unused-parameter -Werror=delete-non-virtual-dtor -Werror=return-type -Werror=implicit -g")
+set(CMAKE_C_FLAGS_RELEASE "-std=c99 -O3 -mtune=native -march=native -Wall -Wextra -Wformat-security -Wmissing-include-dirs -Wuninitialized -Wtrampolines -Wlogical-op -Wno-unused-parameter -Werror=delete-non-virtual-dtor -Werror=return-type -Werror=implicit")
+
 
 add_library(fifo src/fifo.h src/fifo.c)
 target_link_libraries(fifo ${jemalloc_libs})
