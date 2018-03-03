@@ -60,6 +60,7 @@ void fifo_free(fifo_t **queue, bool free_data) {
         }
         free(current);
     }
+    pthread_mutex_unlock((*queue)->mutex);
     pthread_mutex_destroy((*queue)->mutex);
     free(*queue);
     *queue = NULL;
