@@ -45,7 +45,10 @@ void fifo_free(fifo_t **queue, bool free_data) {
     node_t *current;
     while ((current = (*queue)->first) != NULL) {
         (*queue)->first = (*queue)->first->next;
-        if (free_data) free(current->data);
+        if (free_data) {
+            free(current->data);
+            current->data = NULL;
+        }
         free(current);
     }
     free(*queue);
@@ -62,58 +65,139 @@ size_t fifo_count(fifo_t *queue) {
     return count;
 }
 
-#ifndef SNOW_DISABLED
+/*
+ * Tests
+ */
 
-#include "../snow/snow/snow.h"
+#ifndef TESTS_DISABLED
+#define SAMPLE_SIZE 1000000
 
-#define SAMPLE_SIZE 10000
+bool test_fifo_initialize() {
+    fifo_t *fifo = fifo_init();
+    bool test_result = fifo != NULL;
+    fifo->free(&fifo, true);
+    return test_result;
+}
 
-#define setup(name, free_data) \
-    fifo_t *(name) = fifo_init();\
-    defer((name)->free(&(name), (free_data)))
+bool test_fifo_count() {
+    fifo_t *fifo = fifo_init();
+    size_t count = fifo->count(fifo);
+    fifo->free(&fifo, false);
+    return count == 0;
+}
+
+bool test_fifo_empty_enqueue() {
+    uint8_t *byte = calloc(1, sizeof(uint8_t));
+    *byte = 127;
 
 
-describe(FIFO, {
-    it("Initializing FIFO", {
-            setup(fifo, false);
-            assert(fifo != NULL);
-    });
-    it("Counting FIFO", {
-            setup(fifo, false);
-            assert(fifo->count(fifo) == 0);
-    });
-    it("Enqueing empty FIFO", {
-            setup(fifo, false);
-            uint8_t *bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t));
-            for (size_t i = 0; i < SAMPLE_SIZE; ++i) {
-                bytes[i] = (uint8_t) (i % (2 << 7));
-            }
-            fifo->enqueue(fifo, &(bytes[0]));
-            assert(fifo->count(fifo) == 1);
-            assert(*(fifo->first->data) == bytes[0]);
-            free(bytes);
-    });
-    it("Dequeueing empty FIFO", {
-            setup(fifo, false);
-            assert(fifo->dequeue(fifo) == NULL);
-    });
-    it("Freeing empty FIFO", {
-            fifo_t * fifo = fifo_init();
-            fifo->free(&fifo, true);
-            assert(fifo == NULL);
-    });
-    it("Dequeueing singleton", {
-            setup(fifo, false);
-            uint8_t *byte = calloc(1, sizeof(uint8_t));
+    fifo_t *fifo = fifo_init();
+    fifo->enqueue(fifo, byte);
 
-            fifo->enqueue(fifo, byte);
+    size_t count = fifo->count(fifo);
 
-            uint8_t *data = fifo->dequeue(fifo);
+    bool test_result = (*(fifo->first->data) == *(fifo->last->data));
+    test_result &= *fifo->first->data == 127;
+    test_result &= count == 1;
 
-            assert(*data == *byte);
-            assert(fifo->count(fifo) == 0);
-    });
+    fifo->free(&fifo, false);
+    free(byte);
 
-});
+    return test_result;
+}
 
+bool test_fifo_empty_dequeue() {
+    fifo_t *fifo = fifo_init();
+    uint8_t *data = fifo->dequeue(fifo);
+    fifo->free(&fifo, false);
+    return data == NULL;
+}
+
+bool test_fifo_empty_free() {
+    fifo_t *fifo = fifo_init();
+    fifo->free(&fifo, false);
+    return fifo == NULL;
+}
+
+bool test_fifo_singleton_dequeue() {
+    fifo_t *fifo = fifo_init();
+    uint8_t *byte = calloc(1, sizeof(uint8_t));
+    *byte = 253;
+
+    fifo->enqueue(fifo, byte);
+    uint8_t data = *fifo->dequeue(fifo);
+    size_t count = fifo->count(fifo);
+    fifo->free(&fifo, false);
+    free(byte);
+    return (count == 0) && (data == 253);
+}
+
+bool test_fifo_multiple_enqueues() {
+    fifo_t *fifo = fifo_init();
+    uint8_t *bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t));
+    for (size_t i = 0; i < SAMPLE_SIZE; ++i) {
+        bytes[i] = (uint8_t) (i % (2 << 7));
+        fifo->enqueue(fifo, &(bytes[i]));
+    }
+
+    bool test_result = true;
+
+    size_t bytes_idx = 0;
+    node_t *fifo_idx = fifo->first;
+    while (fifo_idx->prev != NULL) {
+        test_result &= (*fifo_idx->data == bytes[bytes_idx]);
+        if (!test_result) break;
+
+        fifo_idx = fifo_idx->prev;
+        ++bytes_idx;
+    }
+    if (test_result) {
+        test_result &= fifo->count(fifo) == SAMPLE_SIZE;
+    }
+
+    free(bytes);
+    fifo->free(&fifo, false);
+
+    return test_result;
+}
+
+bool test_fifo_multiple_dequeues() {
+    fifo_t *fifo = fifo_init();
+    uint8_t *bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t));
+    for (size_t i = 0; i < SAMPLE_SIZE; ++i) {
+        bytes[i] = (uint8_t) (i % (2 << 7));
+        fifo->enqueue(fifo, &(bytes[i]));
+    }
+
+    bool test_result = true;
+
+    for (size_t i = 0; i < SAMPLE_SIZE; ++i) {
+        uint8_t data = *fifo->dequeue(fifo);
+        test_result &= (data == bytes[i]);
+    }
+    if (test_result) {
+        test_result &= (fifo->count(fifo) == 0);
+    }
+
+    free(bytes);
+    fifo->free(&fifo, false);
+
+    return test_result;
+}
+
+bool test_fifo_free() {
+    fifo_t *fifo = fifo_init();
+    uint8_t *bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t));
+    for (size_t i = 0; i < SAMPLE_SIZE; ++i) {
+        bytes[i] = (uint8_t) (i % (2 << 7));
+        fifo->enqueue(fifo, &(bytes[i]));
+    }
+
+    bool test_result = true;
+
+    fifo->free(&fifo, true);
+    test_result &= fifo == NULL;
+
+    return test_result;
+}
 #endif

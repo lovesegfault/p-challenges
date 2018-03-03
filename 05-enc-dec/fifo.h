@@ -27,4 +27,27 @@ void fifo_free(fifo_t **queue, bool free_data);
 
 size_t fifo_count(fifo_t *queue);
 
+#ifndef TESTS_DISABLED
+
+#include <stdio.h>
+
+bool test_fifo_initialize();
+
+bool test_fifo_count();
+
+bool test_fifo_empty_enqueue();
+
+bool test_fifo_empty_dequeue();
+
+bool test_fifo_empty_free();
+
+bool test_fifo_singleton_dequeue();
+
+bool test_fifo_multiple_enqueues();
+
+bool test_fifo_multiple_dequeues();
+
+bool test_fifo_free();
+
+#endif
 #endif //INC_05_ENC_DEC_FIFO_H

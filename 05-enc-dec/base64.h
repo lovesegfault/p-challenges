@@ -5,4 +5,6 @@
 #ifndef INC_05_ENC_DEC_BASE64_H
 #define INC_05_ENC_DEC_BASE64_H
 
+#include <stdint.h>
+
 #endif //INC_05_ENC_DEC_BASE64_H
