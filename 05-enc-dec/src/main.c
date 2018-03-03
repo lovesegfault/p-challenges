@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
 
     // Create input thread
     pthread_t input;
-    pthread_create(&input, NULL, debug_loop, bus);
+    pthread_create(&input, NULL, stdin_loop, bus);
 
     // Process thread
     pthread_t process;
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 
     bus->input->free(&(bus->input), true);
     bus->output->free(&(bus->output), true);
-    //free(bus);
+    free(bus);
     return 0;
 }
 

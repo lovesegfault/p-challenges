@@ -1,5 +1,4 @@
 #include "base64.h"
-#include "fifo.h"
 
 void *process_loop(void *arg){
     bus_t *bus = (bus_t*)(arg);
@@ -9,12 +8,13 @@ void *process_loop(void *arg){
             break;
         }
 
-        if(bus->input->count_mutex(bus->input) >= 3 && !bus->kill) {
-           //fifo_debug_print(bus->input);
-            for(int i = 0; i < 3; ++i)
-                bus->output->enqueue(bus->output, bus->input->dequeue(bus->input));
+        if(bus->input->count >= 3 && !bus->kill) {
+            for(int i = 0; i < 3; ++i) {
+                buf[i] = bus->input->dequeue(bus->input);
+                bus->output->enqueue(bus->output, buf[i]);
+            }
         }
     }
-    free(buf);
+    //free(buf);
     return NULL;
 }

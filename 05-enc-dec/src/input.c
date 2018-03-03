@@ -13,14 +13,16 @@ void *stdin_loop(void *arg) {
     cbreak();
     noecho();
 
-    uint8_t *ch = calloc(1, sizeof(uint8_t));
-    while ((*ch = (uint8_t) getch())) {
-        if (*ch == KEY_EOT || *ch == KEY_ESC)
+    int ch;
+    while ((ch = getch())) {
+        if (ch == KEY_EOT || ch == KEY_ESC)
             break;
-        if ((*ch >= 0 && *ch <= 31 && *ch != KEY_LF))
+        if ((ch >= 0 && ch <= 31 && ch != KEY_LF))
             continue;
-        printw("%c", *ch);
-        fifo->enqueue(fifo, ch);
+        printw("%c", ch);
+        uint8_t *byte = calloc(1, sizeof(uint8_t));
+        *byte = (uint8_t)(ch);
+        fifo->enqueue(fifo, byte);
         refresh();
 
     }

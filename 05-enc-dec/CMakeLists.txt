@@ -10,7 +10,7 @@ find_library(jemalloc_lib jemalloc)
 find_library(pthread_lib pthread)
 set(jemalloc_libs ${jemalloc_lib} ${pthread_lib})
 
-set(CMAKE_C_FLAGS_DEBUG  "-std=c99 -Wall -Wextra -Wformat-security -Wmissing-include-dirs -Wuninitialized -Wno-unused-parameter -Werror=delete-non-virtual-dtor -Werror=return-type -Werror=implicit -g")
+set(CMAKE_C_FLAGS_DEBUG  "-std=c99 -fsanitize=address,undefined -Wall -Wextra -Wformat-security -Wmissing-include-dirs -Wuninitialized -Wno-unused-parameter -Werror=delete-non-virtual-dtor -Werror=return-type -Werror=implicit -g")
 set(CMAKE_C_FLAGS_RELEASE "-std=c99 -O3 -mtune=native -march=native -Wall -Wextra -Wformat-security -Wmissing-include-dirs -Wuninitialized  -Wno-unused-parameter -Werror=delete-non-virtual-dtor -Werror=return-type -Werror=implicit")
 
 # FIFO
