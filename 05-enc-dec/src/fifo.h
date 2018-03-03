@@ -1,8 +1,8 @@
 #ifndef INC_05_ENC_DEC_FIFO_H
 #define INC_05_ENC_DEC_FIFO_H
-#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <jemalloc/jemalloc.h>
 
 typedef struct NODE {
     struct NODE *prev;

@@ -70,7 +70,7 @@ size_t fifo_count(fifo_t *queue) {
  */
 
 #ifndef TESTS_DISABLED
-#define SAMPLE_SIZE 1000000
+#define SAMPLE_SIZE 10000000
 
 bool test_fifo_initialize() {
     fifo_t *fifo = fifo_init();
@@ -88,8 +88,9 @@ bool test_fifo_count() {
 
 bool test_fifo_empty_enqueue() {
     uint8_t *byte = calloc(1, sizeof(uint8_t));
+    if (byte == NULL)
+        return false;
     *byte = 127;
-
 
     fifo_t *fifo = fifo_init();
     fifo->enqueue(fifo, byte);
@@ -122,6 +123,8 @@ bool test_fifo_empty_free() {
 bool test_fifo_singleton_dequeue() {
     fifo_t *fifo = fifo_init();
     uint8_t *byte = calloc(1, sizeof(uint8_t));
+    if (byte == NULL)
+        return false;
     *byte = 253;
 
     fifo->enqueue(fifo, byte);
@@ -135,6 +138,8 @@ bool test_fifo_singleton_dequeue() {
 bool test_fifo_multiple_enqueues() {
     fifo_t *fifo = fifo_init();
     uint8_t *bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t));
+    if (bytes == NULL)
+        return false;
     for (size_t i = 0; i < SAMPLE_SIZE; ++i) {
         bytes[i] = (uint8_t) (i % (2 << 7));
         fifo->enqueue(fifo, &(bytes[i]));
@@ -164,6 +169,9 @@ bool test_fifo_multiple_enqueues() {
 bool test_fifo_multiple_dequeues() {
     fifo_t *fifo = fifo_init();
     uint8_t *bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t));
+    if (bytes == NULL)
+        return false;
+
     for (size_t i = 0; i < SAMPLE_SIZE; ++i) {
         bytes[i] = (uint8_t) (i % (2 << 7));
         fifo->enqueue(fifo, &(bytes[i]));
@@ -188,6 +196,9 @@ bool test_fifo_multiple_dequeues() {
 bool test_fifo_free() {
     fifo_t *fifo = fifo_init();
     uint8_t *bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t));
+    if (bytes == NULL)
+        return false;
+
     for (size_t i = 0; i < SAMPLE_SIZE; ++i) {
         bytes[i] = (uint8_t) (i % (2 << 7));
         fifo->enqueue(fifo, &(bytes[i]));
