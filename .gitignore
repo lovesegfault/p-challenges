@@ -117,5 +117,5 @@ fabric.properties
 .vscode/
 .idea/
 out.*
-perf.data*
+perf.*
 */vgcore*
