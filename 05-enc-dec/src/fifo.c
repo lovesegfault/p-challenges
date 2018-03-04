@@ -18,22 +18,24 @@ fifo_t *fifo_init() {
 void fifo_enqueue(fifo_t *queue, uint8_t *data) {
     pthread_mutex_lock(queue->mutex);
     // Allocate the node
-    node_t *new_elem = calloc(1, sizeof(node_t));
-    new_elem->data = data; // Link data
+    node_t *new = calloc(1, sizeof(node_t));
+    new->data = data; // Link data
 
     // If we are enqueuing on an empty list, set first and last to be the singleton node
     // FIXME: Is this correct / desired?
     if (queue->first == NULL) {
-        queue->first = queue->last = new_elem;
+        queue->first = queue->last = new;
         ++queue->count;
         pthread_mutex_unlock(queue->mutex);
         return;
     }
-    new_elem->next = queue->last; // It is inserted last in the list
-    new_elem->next->prev = new_elem;
 
-    queue->last = new_elem;
-    ++queue->count;
+    queue->last->next = new;
+    new->prev = queue->last;
+
+    queue->last = new;
+     ++queue->count;
+
     pthread_mutex_unlock(queue->mutex);
 }
 
@@ -45,7 +47,9 @@ uint8_t *fifo_dequeue(fifo_t *queue) {
     }
 
     node_t *first = queue->first;
-    queue->first = queue->first->prev;
+    queue->first = first->next;
+    first->prev = NULL;
+
     uint8_t *data = first->data;
     free(first);
     --queue->count;
