@@ -1,5 +1,5 @@
 #include "input.h"
-    
+
 #define KEY_EOT 4
 #define KEY_ESC 27
 #define KEY_LF 10

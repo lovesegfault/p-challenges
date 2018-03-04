@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.5)
 project(05_enc_dec C)
 
 # Get ncurses, we need it for the stdin mode
