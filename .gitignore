@@ -114,8 +114,8 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-.vscode/
-.idea/
-out.*
-perf.*
+*/.vscode/
+*/.idea/
+*/out.*
+*/perf.*
 */vgcore*
