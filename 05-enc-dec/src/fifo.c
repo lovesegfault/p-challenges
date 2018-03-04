@@ -237,20 +237,21 @@ bool test_fifo_multiple_dequeues() {
 
 bool test_fifo_free() {
     fifo_t *fifo = fifo_init();
-    uint8_t *bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t));
+    uint8_t **bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t*));
     if (bytes == NULL)
         return false;
 
     for (size_t i = 0; i < SAMPLE_SIZE; ++i) {
-        bytes[i] = (uint8_t) (i % (2 << 7));
-        fifo->enqueue(fifo, &(bytes[i]));
+        bytes[i] = calloc(1, sizeof(uint8_t));
+        *(bytes[i]) = (uint8_t) (i % (2 << 7));
+        fifo->enqueue(fifo, bytes[i]);
     }
 
     bool test_result = true;
 
     fifo->free(&fifo, true);
     test_result &= fifo == NULL;
-
+    free(bytes);
     return test_result;
 }
 #endif
