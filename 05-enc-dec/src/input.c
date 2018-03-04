@@ -1,6 +1,5 @@
 #include "input.h"
-#include "fifo.h"
-
+    
 #define KEY_EOT 4
 #define KEY_ESC 27
 #define KEY_LF 10
@@ -31,17 +30,3 @@ void *stdin_loop(void *arg) {
     return (NULL);
 }
 
-void *debug_loop(void *arg) {
-    bus_t *bus = (bus_t *) (arg);
-    fifo_t *fifo = bus->input;
-
-    int c;
-    while ((c = getchar()), c != EOF) {
-        printf("%c", c);
-        uint8_t *byte = calloc(1, sizeof(uint8_t));
-        *byte = (uint8_t) (c);
-        fifo->enqueue(fifo, byte);
-    }
-    bus->kill = true;
-    return NULL;
-}

@@ -2,7 +2,7 @@
 
 void *process_loop(void *arg){
     bus_t *bus = (bus_t*)(arg);
-    uint8_t **buf = calloc(3, sizeof(uint8_t));
+    uint8_t **buf = calloc(3, sizeof(uint8_t*));
     while (true) {
         if(bus->kill){
             break;
@@ -15,6 +15,6 @@ void *process_loop(void *arg){
             }
         }
     }
-    //free(buf);
+    free(buf);
     return NULL;
 }
