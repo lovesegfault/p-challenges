@@ -1,6 +1,0 @@
-[submodule "snow"]
-	path = snow
-	url = git@github.com:mortie/snow.git
-[submodule "termbox"]
-	path = termbox
-	url = git@github.com:nsf/termbox.git
