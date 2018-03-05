@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <ncurses.h>
 #include <jemalloc/jemalloc.h>
 
 typedef struct NODE {
@@ -36,9 +35,6 @@ void fifo_enqueue(fifo_t *queue, uint8_t *data);
 uint8_t *fifo_dequeue(fifo_t *queue);
 void fifo_free(fifo_t **queue, bool free_data);
 size_t fifo_count(fifo_t *queue);
-
-size_t fifo_debug_count(fifo_t *queue);
-void fifo_debug_print(fifo_t *queue);
 
 #ifndef TESTS_DISABLED
 

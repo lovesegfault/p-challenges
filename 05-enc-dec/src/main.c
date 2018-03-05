@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
 
     // Create input thread
     pthread_t input;
-    pthread_create(&input, NULL, stdin_loop, bus);
+    pthread_create(&input, NULL, stdin_window, bus);
 
     // Process thread
     pthread_t process;

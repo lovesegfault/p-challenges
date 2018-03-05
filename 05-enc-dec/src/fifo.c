@@ -1,28 +1,35 @@
 #include "fifo.h"
 
+/*
+ * Initializes a FIFO queue
+ */
 fifo_t *fifo_init() {
-    fifo_t *queue = calloc(1, sizeof(fifo_t));
+    fifo_t *queue = calloc(1, sizeof(fifo_t)); // Allocate struct
     queue->last = NULL;
     queue->first = NULL;
-    queue->mutex = calloc(1, sizeof(pthread_mutex_t));
-    pthread_mutex_init(queue->mutex, NULL);
-    queue->count = 0;
+    queue->mutex = calloc(1, sizeof(pthread_mutex_t)); // Allocate mutex
+    pthread_mutex_init(queue->mutex, NULL); // Initialize the mutex, no attributes needed
+    queue->count = 0; // To allow for O(1) counting
 
+    // Function pointers
     queue->count_mutex = fifo_count;
     queue->enqueue = fifo_enqueue;
     queue->dequeue = fifo_dequeue;
     queue->free = fifo_free;
+
     return queue;
 }
 
+/*
+ * Enqueues into FIFO
+ */
 void fifo_enqueue(fifo_t *queue, uint8_t *data) {
-    pthread_mutex_lock(queue->mutex);
+    pthread_mutex_lock(queue->mutex); // Lock
     // Allocate the node
     node_t *new = calloc(1, sizeof(node_t));
     new->data = data; // Link data
 
     // If we are enqueuing on an empty list, set first and last to be the singleton node
-    // FIXME: Is this correct / desired?
     if (queue->first == NULL) {
         queue->first = queue->last = new;
         ++queue->count;
@@ -30,81 +37,99 @@ void fifo_enqueue(fifo_t *queue, uint8_t *data) {
         return;
     }
 
+    // Attach node
     queue->last->next = new;
     new->prev = queue->last;
 
     queue->last = new;
-     ++queue->count;
+     ++queue->count; // Increment element count
 
-    pthread_mutex_unlock(queue->mutex);
+    pthread_mutex_unlock(queue->mutex); // Unlock
 }
 
+/*
+ * Dequeue from FIFO
+ */
 uint8_t *fifo_dequeue(fifo_t *queue) {
-    pthread_mutex_lock(queue->mutex);
+    pthread_mutex_lock(queue->mutex); // Lock
+    // Dequeueing on an empty FIFO returns NULL
     if (queue->first == NULL) {
         pthread_mutex_unlock(queue->mutex);
         return NULL;
     }
 
+    // Detach node
     node_t *first = queue->first;
     queue->first = first->next;
     first->prev = NULL;
 
+    // Save data pointer, free node
     uint8_t *data = first->data;
     free(first);
-    --queue->count;
-    pthread_mutex_unlock(queue->mutex);
+
+    --queue->count; // Decrement element count
+    pthread_mutex_unlock(queue->mutex); // Unlock
+
     return data;
 }
 
+/*
+ * Free FIFO
+ */
 void fifo_free(fifo_t **queue, bool free_data) {
-    pthread_mutex_lock((*queue)->mutex);
-    node_t *current;
-    while ((current = (*queue)->first) != NULL) {
+    pthread_mutex_lock((*queue)->mutex); // Lock
+
+    // Iterate over FIFO, freeing nodes
+    node_t *index;
+    while ((index = (*queue)->first) != NULL) {
         (*queue)->first = (*queue)->first->next;
+        // Optional data freeing
         if (free_data) {
-            free(current->data);
-            current->data = NULL;
+            free(index->data);
+            index->data = NULL;
         }
-        free(current);
+        free(index);
     }
+    // Clean mutex
     pthread_mutex_unlock((*queue)->mutex);
     pthread_mutex_destroy(((*queue)->mutex));
     free((*queue)->mutex);
+    // Free structure
     free(*queue);
     *queue = NULL;
 }
 
 size_t fifo_count(fifo_t *queue) {
-    pthread_mutex_lock(queue->mutex);
-    size_t res = queue->count;
-    pthread_mutex_unlock(queue->mutex);
+    pthread_mutex_lock(queue->mutex); // Lock
+    size_t res = queue->count; // Save count
+    pthread_mutex_unlock(queue->mutex); // Unlock
     return res;
 }
 
 size_t fifo_debug_count(fifo_t *queue) {
-    pthread_mutex_lock(queue->mutex);
+    pthread_mutex_lock(queue->mutex); // Lock
     size_t count = 0;
-    node_t *current = queue->first;
-    while (current != NULL) {
+    node_t *index = queue->first;
+    while (index != NULL) {
         ++count;
-        current = current->prev;
+        index = index->prev;
     }
     pthread_mutex_unlock(queue->mutex);
     return count;
 }
 
 void fifo_debug_print(fifo_t *queue) {
-    pthread_mutex_lock(queue->mutex);
+    pthread_mutex_lock(queue->mutex); // Lock
     node_t *idx = queue->first;
     while (idx != NULL) {
         if(idx->prev)
-            printw("<-");
-        printw(" [%c] ", (char)*(idx->data));
+            printf("<-");
+        printf(" [%c] ", (char)*(idx->data));
         if(idx->next)
-            printw("->");
+            printf("->");
     }
-    printw("\n");
+    printf("\n");
+    pthread_mutex_unlock(queue->mutex); // Unlock
 }
 
 /*
