@@ -1,6 +1,6 @@
-# C Challenges
+# P Challenges
 
-This is a set of solved programming challenges solved in C.
+This is a set programming challenges, solved in C and Rust.
 
 ## How to
 
