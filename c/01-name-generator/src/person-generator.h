@@ -17,7 +17,6 @@ typedef struct _person {
     struct tm *DOB;
 
     void (*print)(struct _person *);
-
     void (*kill)(struct _person *);
 } person;
 

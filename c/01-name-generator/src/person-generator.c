@@ -61,17 +61,9 @@ char *generate_SSN() {
         exit(EXIT_FAILURE);
     }
     // A social security number is composed of:
-    size_t group_number; // A group number (2 digits)
-    size_t serial_number; // A serial number (4 digits)
+    size_t group_number = generate_int(1, 99); // A group number (2 digits)
+    size_t serial_number = generate_int(1, 9999); // A serial number (4 digits)
     size_t lead_number; // A lead number (3 digits)
-
-    do {
-        group_number = generate_int(1, 99);
-    } while (group_number == 0); // The group number cannot be 0
-
-    do {
-        serial_number = generate_int(1, 9999);
-    } while (serial_number == 0); // The serial number cannot be 0
 
     do {
         lead_number = generate_int(1, 999);
@@ -155,7 +147,7 @@ char *generate_address() {
     static const char *suffixes[8] = {"Street", "Lane", "Avenue", "Row", "Route", "Passage", "Boulevard", "Way"};
 
     // Get out street name list
-    FILE *name_list = fopen(STREET_LIST, "r");
+    FILE *name_list = fopen(STREET_LIST, "re");
     if (name_list == NULL) {
         fprintf(stderr, "File %s failed to open. Please verify your CWD.\n", STREET_LIST);
         exit(EXIT_FAILURE);
@@ -191,12 +183,12 @@ char *generate_address() {
 
 char *generate_name() {
     // Open first and last names list
-    FILE *first_names = fopen(FIRST_NAME_LIST, "r");
+    FILE *first_names = fopen(FIRST_NAME_LIST, "re");
     if (first_names == NULL) {
         fprintf(stderr, "File %s failed to open. Please verify your CWD.\n", FIRST_NAME_LIST);
         exit(EXIT_FAILURE);
     }
-    FILE *last_names = fopen(LAST_NAME_LIST, "r");
+    FILE *last_names = fopen(LAST_NAME_LIST, "re");
     if (last_names == NULL) {
         fprintf(stderr, "File %s failed to open. Please verify your CWD.\n", LAST_NAME_LIST);
         exit(EXIT_FAILURE);
@@ -234,10 +226,10 @@ void lower_str(char *str) {
  * split_str - Splits a string on delimiters
  * @param str Input string to be split
  * @param delim Delimiter to split at
- * @param dest Destination pointer of tokens
- * @return Number of tokens in dest
+ * @param n Number of tokens split
+ * @return Array of tokens
  */
-size_t split_str(char *str, const char delim, char ***dest) {
+char **split_str(char *str, const char delim, size_t *n) {
     if (str == NULL) return 0;
 
     size_t delim_count = 0;
@@ -263,9 +255,9 @@ size_t split_str(char *str, const char delim, char ***dest) {
         ++delim_count;
     }
     free(dup);
-    *dest = tokens;
+    *n = delim_count;
 
-    return delim_count;
+    return tokens;
 }
 
 void shuffle(char **arr, size_t n) {
@@ -289,8 +281,9 @@ char *generate_email(char *name, struct tm *DOB) {
 
     char *provider = (char *) providers[generate_int(0, 2)];
 
-    char **tokens;
-    size_t name_count = split_str(name, ' ', &tokens);
+    size_t name_count;
+    char **tokens = split_str(name, ' ', &name_count);
+
     size_t email_size = 1;
     for (size_t i = 0; i < name_count; ++i) {
         email_size += strlen(tokens[i]);

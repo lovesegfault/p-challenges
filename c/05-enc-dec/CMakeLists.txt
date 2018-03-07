@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
 project(05_enc_dec C)
 
+set(CMAKE_C_STANDARD 99)
+
+set(CMAKE_C_FLAGS_DEBUG  "-std=c99 -fsanitize=address,undefined -Wall -Wextra -Wformat-security -Wmissing-include-dirs -Wuninitialized -Wno-unused-parameter -Werror=delete-non-virtual-dtor -Werror=return-type -Werror=implicit -g")
+set(CMAKE_C_FLAGS_RELEASE "-std=c99 -O3 -mtune=native -march=native -Wall -Wextra -Wformat-security -Wmissing-include-dirs -Wuninitialized  -Wno-unused-parameter -Werror=delete-non-virtual-dtor -Werror=return-type -Werror=implicit")
+
 # Get ncurses, we need it for the stdin mode
 find_package(Curses REQUIRED)
 include_directories(${CURSES_INCLUDE_DIR})
@@ -9,7 +14,6 @@ include_directories(${CURSES_INCLUDE_DIR})
 find_library(jemalloc_lib jemalloc)
 find_library(pthread_lib pthread)
 set(jemalloc_libs ${jemalloc_lib} ${pthread_lib})
-
 
 # FIFO
 add_library(fifo src/fifo.c)
