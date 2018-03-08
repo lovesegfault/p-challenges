@@ -1,7 +1,7 @@
 #include "fifo.h"
 #include "../../tests/test.h"
 
-#define RUNS 100
+#define RUNS 1000
 
 void fifo_tests() {
     section("FIFO");

@@ -123,7 +123,7 @@ size_t fifo_debug_count(fifo_t *queue) {
  */
 
 #ifndef TESTS_DISABLED
-#define SAMPLE_SIZE 1000000
+#define SAMPLE_SIZE 100000
 
 bool test_fifo_initialize() {
     fifo_t *fifo = fifo_init();
