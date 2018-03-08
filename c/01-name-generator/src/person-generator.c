@@ -4,20 +4,13 @@
 #define FIRST_NAME_LIST  "lists/first_names.txt"
 #define LAST_NAME_LIST  "lists/last_names.txt"
 
-static bool HAS_URANDOM = true; // Global
-
 unsigned int random_uint() {
     unsigned int r_uint;
     // Try to open the random generator device
-    FILE *f = fopen("/dev/urandom", "r");
+    FILE *f = fopen("/dev/urandom", "re");
     if (f == NULL) {
-        if (HAS_URANDOM) {
-            // Warn that urandom isn't working, but fallthrough to rand()
-            printf("---- Failed loading random generator device /dev/urandom. Defaulting to rand().\n");
-            srand((unsigned int) time(NULL));
-            HAS_URANDOM = false;
-        }
-        r_uint = (unsigned int) rand();
+        printf("Could not open /dev/urandom - Are you on Linux?\n");
+        exit(EXIT_FAILURE);
     } else {
         // If we have urandom, just read from it and cast to uint
         fread(&r_uint, sizeof(r_uint), 1, f);
@@ -221,24 +214,23 @@ void lower_str(char *str) {
     }
 }
 
-
 /*
  * split_str - Splits a string on delimiters
  * @param str Input string to be split
- * @param delim Delimiter to split at
+ * @param delimiter Delimiter to split at
  * @param n Number of tokens split
  * @return Array of tokens
  */
-char **split_str(char *str, const char delim, size_t *n) {
+char **split_str(char *str, const char delimiter, size_t *n) {
     if (str == NULL) return 0;
 
-    size_t delim_count = 0;
+    size_t delimiter_count = 0;
     for (size_t i = 0; i < strlen(str); i++) {
-        if (str[i] == delim) {
-            ++delim_count;
+        if (str[i] == delimiter) {
+            ++delimiter_count;
         }
     }
-    char **tokens = calloc(delim_count + 1, sizeof(char *));
+    char **tokens = calloc(delimiter_count + 1, sizeof(char *));
     if (tokens == NULL) return 0;
 
     char *dup = strdup(str);
@@ -247,15 +239,17 @@ char **split_str(char *str, const char delim, size_t *n) {
         return 0;
     }
 
+    char *save_dup = dup;
     char *found = NULL;
-    delim_count = 0;
-    while ((found = strsep(&dup, &delim)) != NULL) {
-        tokens[delim_count] = calloc(strlen(found) + 1, sizeof(char));
-        strcpy(tokens[delim_count], found);
-        ++delim_count;
+    delimiter_count = 0;
+    while ((found = strtok(dup, &delimiter)) != NULL) {
+        dup = NULL;
+        tokens[delimiter_count] = calloc(strlen(found) + 1, sizeof(char));
+        strcpy(tokens[delimiter_count], found);
+        ++delimiter_count;
     }
-    free(dup);
-    *n = delim_count;
+    free(save_dup);
+    *n = delimiter_count;
 
     return tokens;
 }
