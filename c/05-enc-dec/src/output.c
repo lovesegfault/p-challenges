@@ -3,7 +3,11 @@
 void *output_file_loop(void *arg){
     bus_t *bus = (bus_t*)(arg);
     fifo_t *fifo = bus->output;
-    FILE *out = fopen("out.txt", "ab+");
+    FILE *out = fopen("out.txt", "aeb+");
+    if(out == NULL) {
+        bus->kill = true;
+        return NULL;
+    }
 
     while (true) {
         if(bus->kill)
