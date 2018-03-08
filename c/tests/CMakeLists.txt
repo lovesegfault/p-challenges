@@ -15,6 +15,9 @@ set(WARNINGS "-Wall -Wextra -Wformat-security -Wmissing-include-dirs -Wuninitial
 set(TUNE "-mtune=native -march=native")
 
 set(CMAKE_C_FLAGS_DEBUG "-std=c99 -g ${DEBUG_OPT} ${SANITIZE} ${WARNINGS}")
-set(CMAKE_C_FLAGS_RELEASE "-std=c99 -O3 ${TUNE} ${WARNINGS}")
+set(CMAKE_C_FLAGS_RELEASE "-std=c99 -O3 -flto ${TUNE} ${WARNINGS}")
 
-add_library(tests STATIC test.c test.h)
+find_library(pthread_lib STATIC pthread)
+
+add_library(tests STATIC test.c)
+target_link_libraries(tests pthread_lib)

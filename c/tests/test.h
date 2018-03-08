@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <pthread.h>
+#include <unistd.h>
 
 typedef bool (*test_fn)();
 

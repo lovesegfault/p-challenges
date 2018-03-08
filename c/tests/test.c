@@ -119,12 +119,44 @@ void print_timing(timing *t){
     printc(CYAN, "AVG: %Lf", t->avg / 1000000);
 }
 
+typedef struct {
+    const char *name;
+    bool kill;
+} t_loading;
+
+void *loading(void *arg){
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+    t_loading *t = (t_loading*)(arg);
+
+    //static const char load[4] = {'/', '-', '\\', '-'};
+    static const char *load[] = {"▁", "▂", "▃", "▄", "▅", "▆", "▇", "█", "▇", "▆", "▅", "▄", "▃", "▁"};
+    size_t len = sizeof(load)/sizeof(char*);
+    size_t idx = 0;
+
+
+    while (true) {
+        if(t->kill) break;
+
+        printc(YELLOW, "    %s", load[idx % len]);
+        printc(BLUE, " TESTING | ");
+        printc(YELLOW_B, "%s\r", t->name);
+
+        ++idx;
+        fflush(stdout);
+        usleep(200000);
+    }
+
+    return NULL;
+}
 
 
 bool assert(const char *name, test_fn test, struct t_result *results, size_t runs) {
-    long double *buf = calloc(runs, sizeof(long double));
     bool result = true;
+    t_loading load = {.name=name, .kill=false};
+    pthread_t load_thread;
+    long double *buf = malloc(runs * sizeof(long double));
 
+    pthread_create(&load_thread, NULL, loading, &load);
     for(size_t i = 0; i < runs; ++i){
         struct timeval start, end;
 
@@ -135,10 +167,13 @@ bool assert(const char *name, test_fn test, struct t_result *results, size_t run
         // We could use a rolling average, but precision is crucial here
         buf[i] = elapsed_micros(start, end);
     }
+    pthread_cancel(load_thread);
+
     timing t = compute_timing(buf, runs);
     free(buf);
     results->total += t.total;
 
+    printf("\r");
     if (result) {
         printc(GREEN_B, "    ✓ ");
         printc(GREEN, "SUCCESS");
