@@ -15,7 +15,7 @@ set(WARNINGS "-Wall -Wextra -Wformat-security -Wmissing-include-dirs -Wuninitial
 set(TUNE "-mtune=native -march=native")
 
 set(CMAKE_C_FLAGS_DEBUG "-std=c99 -g ${DEBUG_OPT} ${SANITIZE} ${WARNINGS}")
-set(CMAKE_C_FLAGS_RELEASE "-std=c99 -O3 ${TUNE} ${WARNINGS}")
+set(CMAKE_C_FLAGS_RELEASE "-std=c99 -O3 -flto ${TUNE} ${WARNINGS}")
 
 # Get ncurses, we need it for the stdin mode
 find_package(Curses REQUIRED)
@@ -47,7 +47,7 @@ target_link_libraries(main pthread fifo input base64 output)
 
 
 # Tests
-add_library(testlib STATIC ../tests/test.c)
+add_library(libtest STATIC ../tests/test.c)
 add_executable(tests src/tests.c)
-target_link_libraries(tests testlib fifo)
+target_link_libraries(tests libtest fifo)
 
