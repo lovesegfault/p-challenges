@@ -42,7 +42,7 @@ void fifo_enqueue(fifo_t *queue, uint8_t *data) {
     new->prev = queue->last;
 
     queue->last = new;
-     ++queue->count; // Increment element count
+    ++queue->count; // Increment element count
 
     pthread_mutex_unlock(queue->mutex); // Unlock
 }
@@ -118,26 +118,12 @@ size_t fifo_debug_count(fifo_t *queue) {
     return count;
 }
 
-void fifo_debug_print(fifo_t *queue) {
-    pthread_mutex_lock(queue->mutex); // Lock
-    node_t *idx = queue->first;
-    while (idx != NULL) {
-        if(idx->prev)
-            printf("<-");
-        printf(" [%c] ", (char)*(idx->data));
-        if(idx->next)
-            printf("->");
-    }
-    printf("\n");
-    pthread_mutex_unlock(queue->mutex); // Unlock
-}
-
 /*
  * Tests
  */
 
 #ifndef TESTS_DISABLED
-#define SAMPLE_SIZE 10000000
+#define SAMPLE_SIZE 1000000
 
 bool test_fifo_initialize() {
     fifo_t *fifo = fifo_init();
@@ -262,7 +248,7 @@ bool test_fifo_multiple_dequeues() {
 
 bool test_fifo_free() {
     fifo_t *fifo = fifo_init();
-    uint8_t **bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t*));
+    uint8_t **bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t *));
     if (bytes == NULL)
         return false;
 
@@ -279,4 +265,65 @@ bool test_fifo_free() {
     free(bytes);
     return test_result;
 }
+
+
+void *thread_enqueue(void *arg) {
+    fifo_t *fifo = (fifo_t*)(arg);
+    size_t iter = SAMPLE_SIZE / 100;
+
+    uint8_t *bytes[iter];
+
+    for (size_t i = 0; i < iter; ++i) {
+        bytes[i] = calloc(1, sizeof(uint8_t));
+        *(bytes[i]) = (uint8_t) (i % (2 << 7));
+        fifo->enqueue(fifo, bytes[i]);
+    }
+
+    return NULL;
+}
+
+void *thread_dequeue(void *arg) {
+    fifo_t *fifo = (fifo_t*)(arg);
+    size_t iter = SAMPLE_SIZE / 100;
+
+    for (size_t i = 0; i < iter; ++i) {
+        free(fifo->dequeue(fifo));
+    }
+
+    return NULL;
+}
+
+bool test_fifo_multithreading() {
+    size_t thread_n = 8;
+    size_t expected_elements = thread_n * (SAMPLE_SIZE / 100);
+    bool test_result = true;
+
+    fifo_t *fifo = fifo_init();
+    pthread_t *threads = calloc(thread_n, sizeof(pthread_t));
+    if (threads == NULL)
+        return false;
+
+    for (size_t i = 0; i < thread_n; ++i) {
+        pthread_create(&(threads[i]), NULL, thread_enqueue, fifo);
+    }
+    for (size_t i = 0; i < thread_n; ++i) {
+        pthread_join(threads[i], NULL);
+    }
+
+    test_result &= (fifo->count == expected_elements && fifo->count_mutex(fifo) == expected_elements);
+
+    for (size_t i = 0; i < thread_n; ++i) {
+        pthread_create(&(threads[i]), NULL, thread_dequeue, fifo);
+    }
+    for (size_t i = 0; i < thread_n; ++i) {
+        pthread_join(threads[i], NULL);
+    }
+
+    test_result &= (fifo->count == 0 && fifo->count_mutex(fifo) == 0);
+
+    free(threads);
+    fifo->free(&fifo, true);
+    return test_result;
+}
+
 #endif

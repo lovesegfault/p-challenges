@@ -58,5 +58,7 @@ bool test_fifo_multiple_dequeues();
 
 bool test_fifo_free();
 
+bool test_fifo_multithreading();
+
 #endif
 #endif //INC_05_ENC_DEC_FIFO_H
