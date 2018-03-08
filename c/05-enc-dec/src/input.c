@@ -34,15 +34,18 @@ void *stdin_window(void *arg) {
     noecho();
 
     WINDOW *input_win;
-    int startx, starty, width, height;
+    int start_x, start_y, width, height;
     height = LINES;
     width = (COLS / 2) - 1;
-    starty = 0;    /* Calculating for a center placement */
-    startx = 0;    /* of the window		*/
-    input_win = create_win(height, width, starty, startx);
+    start_y = 0;    /* Calculating for a center placement */
+    start_x = 0;    /* of the window		*/
+    input_win = create_win(height, width, start_y, start_x);
     wmove(input_win, 1, 1);
     int ch;
     while ((ch = wgetch(input_win))) {
+        if(bus->kill) {
+            break;
+        }
         if (ch == KEY_EOT || ch == KEY_ESC)
             break;
         if ((ch >= 0 && ch <= 31 && ch != KEY_LF))
