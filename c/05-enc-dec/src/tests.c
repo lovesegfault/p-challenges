@@ -1,5 +1,5 @@
 #include "fifo.h"
-#include "../../tests/test.h"
+#include "../../zuul/zuul.h"
 
 #define RUNS 1000
 

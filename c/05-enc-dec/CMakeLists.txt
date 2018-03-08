@@ -47,7 +47,7 @@ target_link_libraries(main pthread fifo input base64 output)
 
 
 # Tests
-add_library(libtest STATIC ../tests/test.c)
+add_library(zuul STATIC ../zuul/zuul.c)
 add_executable(tests src/tests.c)
-target_link_libraries(tests libtest fifo)
+target_link_libraries(tests zuul fifo)
 
