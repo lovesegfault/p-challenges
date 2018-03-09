@@ -26,7 +26,7 @@ void draw() {
 
 
 void *stdin_window(void *arg) {
-    bus_t *bus = (bus_t *) (arg);
+    struct thread_bus *bus = (struct thread_bus*) (arg);
     fifo_t *fifo = bus->input;
 
     initscr();
@@ -66,7 +66,7 @@ void *stdin_window(void *arg) {
 }
 
 void *stdin_loop(void *arg) {
-    bus_t *bus = (bus_t *) (arg);
+    struct thread_bus *bus = (struct thread_bus *) (arg);
     fifo_t *fifo = bus->input;
     initscr();
     cbreak();

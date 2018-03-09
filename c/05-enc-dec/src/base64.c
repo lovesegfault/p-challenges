@@ -1,7 +1,14 @@
 #include "base64.h"
 
+static const char base64chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+char *base64_encode(uint8_t *buf[3]){
+
+    return NULL;
+}
+
 void *process_loop(void *arg){
-    bus_t *bus = (bus_t*)(arg);
+    struct thread_bus *bus = (struct thread_bus*)(arg);
     uint8_t **buf = calloc(3, sizeof(uint8_t*));
     while (true) {
         if(bus->kill){

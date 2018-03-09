@@ -5,15 +5,15 @@
 #include <pthread.h>
 #include <jemalloc/jemalloc.h>
 
-typedef struct NODE {
-    struct NODE *prev;
-    struct NODE *next;
+struct list_node {
+    struct list_node *prev;
+    struct list_node *next;
     uint8_t *data;
-} node_t;
+};
 
 typedef struct FIFO {
-    node_t *first;
-    node_t *last;
+    struct list_node *first;
+    struct list_node *last;
 
     size_t count;
     pthread_mutex_t *mutex;
@@ -24,11 +24,11 @@ typedef struct FIFO {
     void (*free)(struct FIFO**, bool);
 } fifo_t;
 
-typedef struct {
+struct thread_bus {
     fifo_t *input;
     fifo_t *output;
     bool kill;
-} bus_t;
+};
 
 fifo_t *fifo_init();
 void fifo_enqueue(fifo_t *queue, uint8_t *data);

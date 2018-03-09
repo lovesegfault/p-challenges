@@ -6,7 +6,7 @@
 
 int main(int argc, char **argv) {
     // FIFO's
-    bus_t *bus = calloc(1, sizeof(bus_t));
+    struct thread_bus *bus = calloc(1, sizeof(struct thread_bus));
     bus->input = fifo_init();
     bus->output = fifo_init();
 

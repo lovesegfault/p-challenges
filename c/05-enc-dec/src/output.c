@@ -1,7 +1,7 @@
 #include "output.h"
 
 void *output_file_loop(void *arg){
-    bus_t *bus = (bus_t*)(arg);
+    struct thread_bus *bus = (struct thread_bus*)(arg);
     fifo_t *fifo = bus->output;
     FILE *out = fopen("out.txt", "aeb+");
     if(out == NULL) {

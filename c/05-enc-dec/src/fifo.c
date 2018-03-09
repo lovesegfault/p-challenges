@@ -26,7 +26,7 @@ fifo_t *fifo_init() {
 void fifo_enqueue(fifo_t *queue, uint8_t *data) {
     pthread_mutex_lock(queue->mutex); // Lock
     // Allocate the node
-    node_t *new = calloc(1, sizeof(node_t));
+    struct list_node *new = calloc(1, sizeof(struct list_node));
     new->data = data; // Link data
 
     // If we are enqueuing on an empty list, set first and last to be the singleton node
@@ -59,7 +59,7 @@ uint8_t *fifo_dequeue(fifo_t *queue) {
     }
 
     // Detach node
-    node_t *first = queue->first;
+    struct list_node *first = queue->first;
     queue->first = first->next;
     first->prev = NULL;
 
@@ -80,7 +80,7 @@ void fifo_free(fifo_t **queue, bool free_data) {
     pthread_mutex_lock((*queue)->mutex); // Lock
 
     // Iterate over FIFO, freeing nodes
-    node_t *index;
+    struct list_node *index;
     while ((index = (*queue)->first) != NULL) {
         (*queue)->first = (*queue)->first->next;
         // Optional data freeing
@@ -109,7 +109,7 @@ size_t fifo_count(fifo_t *queue) {
 size_t fifo_debug_count(fifo_t *queue) {
     pthread_mutex_lock(queue->mutex); // Lock
     size_t count = 0;
-    node_t *index = queue->first;
+    struct list_node *index = queue->first;
     while (index != NULL) {
         ++count;
         index = index->prev;
@@ -176,8 +176,10 @@ bool test_fifo_empty_free() {
 bool test_fifo_singleton_dequeue() {
     fifo_t *fifo = fifo_init();
     uint8_t *byte = calloc(1, sizeof(uint8_t));
-    if (byte == NULL)
+    if (byte == NULL){
+        fifo->free(&fifo, true);
         return false;
+    }
     *byte = 253;
 
     fifo->enqueue(fifo, byte);
@@ -191,8 +193,10 @@ bool test_fifo_singleton_dequeue() {
 bool test_fifo_multiple_enqueues() {
     fifo_t *fifo = fifo_init();
     uint8_t *bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t));
-    if (bytes == NULL)
+    if (bytes == NULL){
+        fifo->free(&fifo, true);
         return false;
+    }
     for (size_t i = 0; i < SAMPLE_SIZE; ++i) {
         bytes[i] = (uint8_t) (i % (2 << 7));
         fifo->enqueue(fifo, &(bytes[i]));
@@ -201,7 +205,7 @@ bool test_fifo_multiple_enqueues() {
     bool test_result = true;
 
     size_t bytes_idx = 0;
-    node_t *fifo_idx = fifo->first;
+    struct list_node *fifo_idx = fifo->first;
     while (fifo_idx->prev != NULL) {
         test_result &= (*fifo_idx->data == bytes[bytes_idx]);
         if (!test_result) break;
@@ -222,8 +226,11 @@ bool test_fifo_multiple_enqueues() {
 bool test_fifo_multiple_dequeues() {
     fifo_t *fifo = fifo_init();
     uint8_t *bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t));
-    if (bytes == NULL)
+    if (bytes == NULL){
+        fifo->free(&fifo, true);
         return false;
+    }
+
 
     for (size_t i = 0; i < SAMPLE_SIZE; ++i) {
         bytes[i] = (uint8_t) (i % (2 << 7));
@@ -249,8 +256,11 @@ bool test_fifo_multiple_dequeues() {
 bool test_fifo_free() {
     fifo_t *fifo = fifo_init();
     uint8_t **bytes = calloc(SAMPLE_SIZE, sizeof(uint8_t *));
-    if (bytes == NULL)
+    if (bytes == NULL){
+        fifo->free(&fifo, true);
         return false;
+    }
+
 
     for (size_t i = 0; i < SAMPLE_SIZE; ++i) {
         bytes[i] = calloc(1, sizeof(uint8_t));
@@ -300,8 +310,10 @@ bool test_fifo_multithreading() {
 
     fifo_t *fifo = fifo_init();
     pthread_t *threads = calloc(thread_n, sizeof(pthread_t));
-    if (threads == NULL)
+    if (threads == NULL){
+        fifo->free(&fifo, true);
         return false;
+    }
 
     for (size_t i = 0; i < thread_n; ++i) {
         pthread_create(&(threads[i]), NULL, thread_enqueue, fifo);
