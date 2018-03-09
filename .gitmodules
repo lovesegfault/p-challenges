@@ -1,3 +1,0 @@
-[submodule "c/zuul"]
-	path = c/zuul
-	url = git@github.com:bemeurer/zuul.git
