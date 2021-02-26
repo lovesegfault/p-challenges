@@ -46,36 +46,35 @@ See also: [HackerRank](https://www.hackerrank.com/), [CodeChef](https://www.code
 
 ## Challenges
 
-1. Name generator (+ credentials)
-1. Higher/lower, heads, tails
+1. [FizzBuzz](https://en.wikipedia.org/wiki/Fizz_buzz)
 1. Temperature converter
+1. BMI Calculator
+1. Higher/lower, heads, tails
+1. Magic eight ball
+1. Password/passphrase generator
+1. Name generator (+ credentials)
+1. Random sentence generator
+1. Haiku Generator
+1. Rock, paper, scissors (+ lizard, Spock)
+1. Factorial
+1. Fibonacci Sequence
+1. [Collatz Conjecture](https://en.wikipedia.org/wiki/Collatz_conjecture)
 1. Calculate age in seconds (with leap years)
 1. Encryption/Decryption algorithm
-1. [FizzBuzz](https://en.wikipedia.org/wiki/Fizz_buzz)
-1. Rock, paper, scissors (+ lizard, Spock)
 1. Project Euler
 1. Hangman
-1. Love calculator
-1. Random sentence generator
-1. Password/passphrase generator
 1. Internet time (NTP)
-1. Haiku Generator
-1. Magic eight ball
-1. [Collatz Conjecture](https://en.wikipedia.org/wiki/Collatz_conjecture)
 1. Reverse a string
 1. [Eulerian path](https://en.wikipedia.org/wiki/Eulerian_path)
 1. Simple file explorer
 1. Count words in string (lines, sentences, paragraphs, typos, etc.)
 1. Minesweeper
 1. [Connect Four](https://en.wikipedia.org/wiki/Connect_Four)
-1. BMI Calculator
 1. 4Chan thread/image downloader
 1. Sudoku generator/solver
 1. Maze generator/solver (Random graphs/trees)
 1. Radix (base) converter
 1. [Picross](https://en.wikipedia.org/wiki/Nonogram) solver
-1. Fibonacci Sequence
-1. Factorial
 1. Cipher encryption/decryption tool[^1]
 1. Blackjack
 1. Dungeons & Dragons with AI
